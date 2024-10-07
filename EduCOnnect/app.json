@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "EduCOnnect",
+    "slug": "EduCOnnect",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses the camera to allow you to upload videos.",
+        "NSMicrophoneUsageDescription": "This app uses the microphone to record audio for your videos.",
+        "NSCalendarsUsageDescription": "This app requires access to the calendar to schedule your study plans."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "INTERNET",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_CALENDAR",
+        "WRITE_CALENDAR"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "allowsEditing": false
+        }
+      ]
+    ]
+  }
+}
