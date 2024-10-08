@@ -5,7 +5,7 @@ import LandingPage from "./components/LandingPage";
 import OnboardScreen from "./components/OnboardScreen";
 import LoginScreen from "./components/LoginScreen";
 import SignUpScreen from "./components/SignUpScreen";
-import VideoUpload from "./components/VideoUpload";
+import UploadVideoScreen from "./components/UploadVideoScreen";
 import StudentHomePage from "./components/StudentHomePage";
 import LectureDetailScreen from "./components/LectureDetailScreen";
 import TeacherDashboard from "./components/TeacherDashboard";
@@ -23,7 +23,7 @@ import StudyPlanerProgress from "./components/StudyPlanerProgress";
 import StudyPlannerUpdate from "./components/StudyPlannerUpdate";
 import EditQuestionScreen from "./components/EditQuestionScreen";
 import ManageQuestionsScreen from "./components/ManageQuestionsScreen";
-
+import CreateCourseScreen from "./components/CreateCourseScreen";
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -37,7 +37,7 @@ export default function Navigation() {
         <Stack.Screen name="OnboardScreen" component={OnboardScreen} />
         <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen name="SignUpScreen" component={SignUpScreen} />
-        <Stack.Screen name="VideoUpload" component={VideoUpload} />
+        <Stack.Screen name="UploadVideoScreen" component={UploadVideoScreen} />
         <Stack.Screen name="StudentHomePage" component={StudentHomePage} />
         <Stack.Screen
           name="LectureDetailScreen"
@@ -79,6 +79,10 @@ export default function Navigation() {
         <Stack.Screen
           name="ManageQuestionsScreen"
           component={ManageQuestionsScreen}
+        />
+        <Stack.Screen
+          name="CreateCourseScreen"
+          component={CreateCourseScreen}
         />
       </Stack.Navigator>
     </NavigationContainer>

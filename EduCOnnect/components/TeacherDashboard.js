@@ -8,18 +8,37 @@ import {
   Image,
   TouchableOpacity,
   ProgressBarAndroid,
+  Alert,
+  Modal,
+  Pressable,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { useNavigation } from "@react-navigation/native";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "../firebaseConfig";
+import { Video } from "expo-av";
 import BottomNavBarTeacher from "./BottemNavBarTeacher";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons"; // Icons for modify and delete
 
 const screenWidth = Dimensions.get("window").width;
 
 export default function TeacherDashboard() {
   const [uploadProgress, setUploadProgress] = useState(0.7); // Set progress as a percentage
-  const [uploadedLectures, setUploadedLectures] = useState([]); // State to hold uploaded lectures
+  const [courses, setCourses] = useState([]); // State to hold fetched courses
+  const [modalVisible, setModalVisible] = useState(false); // For editing popup
+  const [selectedCourse, setSelectedCourse] = useState(null); // To hold selected course for modification
+  const [courseName, setCourseName] = useState(""); // Edit course name
+  const [courseDescription, setCourseDescription] = useState(""); // Edit course description
+  const [courseCategory, setCourseCategory] = useState(""); // Edit course category
+  const navigation = useNavigation();
 
   // Data for the Line Chart (you can customize it with real data)
   const data = {
@@ -32,27 +51,86 @@ export default function TeacherDashboard() {
     ],
   };
 
-  // Simulated function to fetch uploaded lectures
-  const fetchUploadedLectures = () => {
-    // This function should call your API or Firebase to get the uploaded lectures.
-    const fetchedLectures = [
-      { title: "SpringBoot BackEnd for Beginners", duration: "16 hours" },
-      { title: "Product Design v1.0", duration: "16 hours" },
-      { title: "Java Development", duration: "10 hours" },
-      { title: "Visual Design", duration: "14 hours" },
-    ]; // Replace this with actual data fetching
-    setUploadedLectures(fetchedLectures);
+  // Fetch courses from Firestore
+  const fetchCourses = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "courses"));
+      const fetchedCourses = [];
+      querySnapshot.forEach((doc) => {
+        fetchedCourses.push({ id: doc.id, ...doc.data() });
+      });
+      setCourses(fetchedCourses);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+      Alert.alert("Error", "Failed to load courses.");
+    }
   };
 
   useEffect(() => {
-    fetchUploadedLectures(); // Fetch uploaded lectures on component mount
+    fetchCourses(); // Fetch uploaded courses on component mount
   }, []);
 
   const handleCancelUpload = () => {
-    // Logic to cancel the upload goes here
     console.log("Upload canceled");
-    // Reset progress or perform any other cleanup
     setUploadProgress(0);
+  };
+
+  const handleModifyCourse = (course) => {
+    setSelectedCourse(course);
+    setCourseName(course.name);
+    setCourseDescription(course.description);
+    setCourseCategory(course.category);
+    setModalVisible(true);
+  };
+
+  const handleUpdateCourse = async () => {
+    if (!courseName || !courseDescription || !courseCategory) {
+      Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const courseRef = doc(db, "courses", selectedCourse.id);
+      await updateDoc(courseRef, {
+        name: courseName,
+        description: courseDescription,
+        category: courseCategory,
+      });
+      Alert.alert("Success", "Course details updated successfully!");
+      setModalVisible(false);
+      fetchCourses(); // Refresh the courses list
+    } catch (error) {
+      console.error("Error updating course:", error);
+      Alert.alert("Error", "Failed to update course details.");
+    }
+  };
+
+  const handleDeleteCourse = (course) => {
+    Alert.alert(
+      "Delete Confirmation",
+      `Are you sure you want to delete the course: ${course.name}?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteDoc(doc(db, "courses", course.id));
+              Alert.alert("Success", "Course deleted successfully!");
+              fetchCourses(); // Refresh the list after deletion
+            } catch (error) {
+              console.error("Error deleting course:", error);
+              Alert.alert("Error", "Failed to delete the course.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const navigateToUploadScreen = (courseId) => {
+    navigation.navigate("UploadVideoScreen", { courseId });
   };
 
   return (
@@ -97,11 +175,10 @@ export default function TeacherDashboard() {
             <TouchableOpacity style={styles.saveReportButton}>
               <Text style={styles.saveReportText}>Save Report</Text>
             </TouchableOpacity>
-            {/* Real Line Chart */}
             <View style={styles.chartContainer}>
               <LineChart
-                data={data}
-                width={screenWidth - 80} // Ensures padding on both sides
+                data={data} // Correct reference to 'data'
+                width={screenWidth - 80}
                 height={220}
                 yAxisLabel=""
                 chartConfig={{
@@ -137,12 +214,103 @@ export default function TeacherDashboard() {
           onCancel={handleCancelUpload}
         />
 
-        {/* Your Lectures Section */}
-        <LecturesSection lectures={uploadedLectures} />
+        {/* Your Courses Section */}
+        <View style={styles.lecturesSection}>
+          <Text style={styles.sectionTitle}>Your Courses</Text>
+          {courses.length > 0 ? (
+            courses.map((course) => (
+              <View key={course.id} style={styles.lectureCard}>
+                {course.videoURLs && course.videoURLs.length > 0 ? (
+                  <Video
+                    source={{ uri: course.videoURLs[0] }}
+                    style={styles.lectureThumbnail}
+                    useNativeControls={false}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.lectureThumbnailPlaceholder}>
+                    <Text style={styles.thumbnailText}>No Preview</Text>
+                  </View>
+                )}
+
+                <View style={styles.lectureDetails}>
+                  <Text style={styles.lectureTitle}>{course.name}</Text>
+                  <Text style={styles.lectureInfo}>{course.category}</Text>
+                </View>
+
+                <View style={styles.iconContainer}>
+                  <TouchableOpacity
+                    onPress={() => handleModifyCourse(course)}
+                    style={styles.iconButton}
+                  >
+                    <MaterialIcons name="edit" size={24} color="#FFF" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => handleDeleteCourse(course)}
+                    style={styles.iconButton}
+                  >
+                    <MaterialIcons name="delete" size={24} color="#FF6B6B" />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))
+          ) : (
+            <Text style={styles.noCoursesText}>No courses available.</Text>
+          )}
+        </View>
       </ScrollView>
 
       {/* Bottom Navigation Bar */}
       <BottomNavBarTeacher />
+
+      {/* Edit Course Modal */}
+      {selectedCourse && (
+        <Modal animationType="slide" transparent={true} visible={modalVisible}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Edit Course</Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Course Name"
+                value={courseName}
+                onChangeText={setCourseName}
+                placeholderTextColor="#B0B0C3"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Course Description"
+                value={courseDescription}
+                onChangeText={setCourseDescription}
+                placeholderTextColor="#B0B0C3"
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Course Category"
+                value={courseCategory}
+                onChangeText={setCourseCategory}
+                placeholderTextColor="#B0B0C3"
+              />
+
+              <TouchableOpacity
+                onPress={handleUpdateCourse}
+                style={styles.updateButton}
+              >
+                <Text style={styles.updateButtonText}>Update Course</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.cancelButton}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -152,7 +320,6 @@ const UploadingSection = ({ uploadProgress, onCancel }) => {
   const navigation = useNavigation(); // Initialize navigation
 
   const handleAddQuiz = () => {
-    // Navigate to AddQuiz.js when the button is pressed
     navigation.navigate("AllQuizzesScreenTeacher");
   };
 
@@ -186,31 +353,6 @@ const UploadingSection = ({ uploadProgress, onCancel }) => {
     </View>
   );
 };
-
-// Your Lectures Section Component
-const LecturesSection = ({ lectures }) => (
-  <View style={styles.lecturesSection}>
-    <Text style={styles.sectionTitle}>Your Lectures</Text>
-    {lectures.map((lecture, index) => (
-      <LectureCard
-        key={index}
-        title={lecture.title}
-        duration={lecture.duration}
-      />
-    ))}
-  </View>
-);
-
-// Reusable Lecture Card
-const LectureCard = ({ title, duration }) => (
-  <View style={styles.lectureCard}>
-    <View style={styles.lectureThumbnail} />
-    <View style={styles.lectureDetails}>
-      <Text style={styles.lectureTitle}>{title}</Text>
-      <Text style={styles.lectureInfo}>{duration}</Text>
-    </View>
-  </View>
-);
 
 const styles = StyleSheet.create({
   container: {
@@ -295,7 +437,7 @@ const styles = StyleSheet.create({
     color: "#3D5CFF",
   },
   chartContainer: {
-    alignItems: "center", // Center the chart
+    alignItems: "center",
     marginVertical: 20,
   },
   uploadingSection: {
@@ -329,7 +471,7 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   addQuizButton: {
-    backgroundColor: "#FF6B6B", // Same theme color as the progress bar
+    backgroundColor: "#FF6B6B",
     padding: 12,
     borderRadius: 8,
     marginTop: 10,
@@ -351,13 +493,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  lectureThumbnail: {
-    width: 60,
-    height: 60,
-    backgroundColor: "#B0B0C3",
-    borderRadius: 8,
-    marginRight: 15,
-  },
   lectureDetails: {
     flex: 1,
   },
@@ -369,5 +504,76 @@ const styles = StyleSheet.create({
     color: "#B0B0C3",
     fontFamily: "Poppins_400Regular",
     fontSize: 12,
+  },
+  lectureThumbnail: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 15,
+  },
+  lectureThumbnailPlaceholder: {
+    width: 60,
+    height: 60,
+    backgroundColor: "#B0B0C3",
+    borderRadius: 8,
+    marginRight: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  thumbnailText: {
+    color: "#fff",
+    fontSize: 10,
+  },
+  iconContainer: {
+    flexDirection: "row",
+  },
+  noCoursesText: {
+    color: "#B0B0C3",
+    textAlign: "center",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: "Poppins_700Bold",
+    marginBottom: 15,
+  },
+  input: {
+    backgroundColor: "#3E3E55",
+    padding: 10,
+    borderRadius: 8,
+    color: "#fff",
+    marginBottom: 10,
+  },
+  updateButton: {
+    backgroundColor: "#3D5CFF",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  updateButtonText: {
+    color: "#fff",
+    fontFamily: "Poppins_700Bold",
+  },
+  cancelButton: {
+    backgroundColor: "#FF6B6B",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  cancelButtonText: {
+    color: "#fff",
+    fontFamily: "Poppins_700Bold",
   },
 });
