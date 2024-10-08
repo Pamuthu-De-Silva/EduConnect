@@ -10,7 +10,7 @@ import {
   ProgressBarAndroid,
   Alert,
   Modal,
-  Pressable,
+  RefreshControl, // Import RefreshControl
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
@@ -38,6 +38,7 @@ export default function TeacherDashboard() {
   const [courseName, setCourseName] = useState(""); // Edit course name
   const [courseDescription, setCourseDescription] = useState(""); // Edit course description
   const [courseCategory, setCourseCategory] = useState(""); // Edit course category
+  const [refreshing, setRefreshing] = useState(false); // State for refresh control
   const navigation = useNavigation();
 
   // Data for the Line Chart (you can customize it with real data)
@@ -64,6 +65,13 @@ export default function TeacherDashboard() {
       console.error("Error fetching courses:", error);
       Alert.alert("Error", "Failed to load courses.");
     }
+  };
+
+  // Fetch courses and handle refresh state
+  const handleRefresh = async () => {
+    setRefreshing(true); // Show refresh indicator
+    await fetchCourses(); // Reload data
+    setRefreshing(false); // Hide refresh indicator
   };
 
   useEffect(() => {
@@ -166,7 +174,12 @@ export default function TeacherDashboard() {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        } // Add refresh control
+      >
         {/* Analytics Section */}
         <View style={styles.analyticsSection}>
           <Text style={styles.analyticsTitle}>Analyze Your Views</Text>
@@ -220,24 +233,31 @@ export default function TeacherDashboard() {
           {courses.length > 0 ? (
             courses.map((course) => (
               <View key={course.id} style={styles.lectureCard}>
-                {course.videoURLs && course.videoURLs.length > 0 ? (
-                  <Video
-                    source={{ uri: course.videoURLs[0] }}
-                    style={styles.lectureThumbnail}
-                    useNativeControls={false}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={styles.lectureThumbnailPlaceholder}>
-                    <Text style={styles.thumbnailText}>No Preview</Text>
-                  </View>
-                )}
+                {/* Video Preview - Add navigation to UploadVideoScreen */}
+                <TouchableOpacity
+                  onPress={() => navigateToUploadScreen(course.id)}
+                >
+                  {course.videoURLs && course.videoURLs.length > 0 ? (
+                    <Video
+                      source={{ uri: course.videoURLs[0] }} // Display first video as preview
+                      style={styles.lectureThumbnail}
+                      useNativeControls={false}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={styles.lectureThumbnailPlaceholder}>
+                      <Text style={styles.thumbnailText}>No Preview</Text>
+                    </View>
+                  )}
+                </TouchableOpacity>
 
+                {/* Course Details */}
                 <View style={styles.lectureDetails}>
                   <Text style={styles.lectureTitle}>{course.name}</Text>
                   <Text style={styles.lectureInfo}>{course.category}</Text>
                 </View>
 
+                {/* Icons for Edit and Delete */}
                 <View style={styles.iconContainer}>
                   <TouchableOpacity
                     onPress={() => handleModifyCourse(course)}

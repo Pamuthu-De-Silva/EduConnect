@@ -64,41 +64,46 @@ export default function UploadVideoScreen({ route }) {
 
         const uploadTask = uploadBytesResumable(storageRef, blob);
 
-        uploadTask.on(
-          "state_changed",
-          (snapshot) => {
-            const progressPercent =
-              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            setProgress((prevProgress) => ({
-              ...prevProgress,
-              [video.uri]: progressPercent,
-            }));
-          },
-          (error) => {
-            console.error("Upload error:", error);
-            Alert.alert("Upload Error", error.message);
-            setUploading(false);
-          },
-          async () => {
-            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-            videoURLs.push(downloadURL);
-
-            if (i === videoFiles.length - 1) {
-              await updateDoc(doc(db, "courses", courseId), {
-                videoURLs: videoURLs,
-              });
+        await new Promise((resolve, reject) => {
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progressPercent =
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              setProgress((prevProgress) => ({
+                ...prevProgress,
+                [video.uri]: progressPercent,
+              }));
+            },
+            (error) => {
+              console.error("Upload error:", error);
+              Alert.alert("Upload Error", error.message);
               setUploading(false);
-              Alert.alert("Success", "All videos uploaded successfully!");
+              reject(error);
+            },
+            async () => {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+              videoURLs.push(downloadURL); // Add each URL to the array
+              resolve();
             }
-          }
-        );
+          );
+        });
       }
+
+      // Once all videos are uploaded, update Firestore with the complete array
+      await updateDoc(doc(db, "courses", courseId), {
+        videoURLs: videoURLs,
+      });
+
+      setUploading(false);
+      Alert.alert("Success", "All videos uploaded successfully!");
     } catch (error) {
       console.error("Error uploading videos:", error);
       Alert.alert("Error", error.message);
       setUploading(false);
     }
   };
+
 
   return (
     <View style={styles.container}>

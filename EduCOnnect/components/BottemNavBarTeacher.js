@@ -32,71 +32,66 @@ export default function BottomNavBar() {
 
   return (
     <LinearGradient
-      colors={['#3D5CFF', '#6A82FB']}  // Gradient colors for a modern look
+      colors={["#3D5CFF", "#6A82FB"]} // Gradient colors for a modern look
       style={styles.navBar}
     >
       {/* Home Button */}
       <TouchableOpacity
         style={styles.navButton}
-        onPress={() => navigation.navigate('TeacherDashboard')}
+        onPress={() => navigation.navigate("TeacherDashboard")}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
         <Animated.View style={[styles.iconContainer, animatedStyle]}>
           <Icon name="home" size={28} color="#fff" />
-          
         </Animated.View>
       </TouchableOpacity>
 
       {/* Resources Button */}
       <TouchableOpacity
         style={styles.navButton}
-        onPress={() => navigation.navigate('PdfUploadPage')}
+        onPress={() => navigation.navigate("PdfUploadPage")}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
         <Animated.View style={[styles.iconContainer, animatedStyle]}>
           <Icon name="library-books" size={28} color="#fff" />
-          
         </Animated.View>
       </TouchableOpacity>
 
       {/* Downloads Button */}
       <TouchableOpacity
         style={styles.navButton}
-        onPress={() => navigation.navigate('VideoUpload')}
+        onPress={() => navigation.navigate("CreateCourseScreen")}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
         <Animated.View style={[styles.iconContainer, animatedStyle]}>
           <AntDesign name="upload" size={28} color="#fff" />
-          
         </Animated.View>
       </TouchableOpacity>
 
       {/* Community Button */}
       <TouchableOpacity
         style={styles.navButton}
-        onPress={() => navigation.navigate('Community')}
+        onPress={() => navigation.navigate("Community")}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
         <Animated.View style={[styles.iconContainer, animatedStyle]}>
           <Icon name="group" size={28} color="#fff" />
-          
         </Animated.View>
       </TouchableOpacity>
 
       {/* Account Button */}
       <TouchableOpacity
         style={styles.navButton}
-        onPress={() => navigation.navigate('Account')}
+        onPress={() => navigation.navigate("Account")}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
         <Animated.View style={[styles.iconContainer, animatedStyle]}>
           <Icon name="account-circle" size={28} color="#fff" />
-          
         </Animated.View>
       </TouchableOpacity>
     </LinearGradient>
