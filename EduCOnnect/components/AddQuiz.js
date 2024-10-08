@@ -19,15 +19,10 @@ import { db, auth } from "../firebaseConfig";
 import BottomNavBarTeacher from "./BottemNavBarTeacher";
 
 export default function CreateQuiz({ navigation }) {
-  // Add navigation prop
   const [quizTitle, setQuizTitle] = useState("");
   const [quizDescription, setQuizDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
-
-  useEffect(() => {
-    // Additional effects or data fetching can be added here if necessary
-  }, []);
 
   const handleCreateQuiz = async () => {
     if (!quizTitle || !quizDescription) {
@@ -45,7 +40,7 @@ export default function CreateQuiz({ navigation }) {
         createdAt: new Date(),
       });
 
-      const createdQuizId = quizDocRef.id; // Get the ID of the created quiz
+      const createdQuizId = quizDocRef.id;
 
       setQuizTitle("");
       setQuizDescription("");

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// UpdateQuizScreen.js
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,7 +10,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from "react-native";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import FormButton from "../components/shared/FormButton"; // Your shared button component
 import BottomNavBarTeacher from "./BottemNavBarTeacher"; // Importing BottomNavBarTeacher
@@ -20,12 +21,40 @@ import {
 } from "@expo-google-fonts/poppins";
 
 const UpdateQuizScreen = ({ route, navigation }) => {
-  const { quizId, currentTitle, currentDescription } = route.params;
-  const [title, setTitle] = useState(currentTitle);
-  const [description, setDescription] = useState(currentDescription);
-  const [loading, setLoading] = useState(false);
+  const { quizId } = route.params;
+  const [currentTitle, setCurrentTitle] = useState("");
+  const [currentDescription, setCurrentDescription] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
+
+  useEffect(() => {
+    const fetchQuizDetails = async () => {
+      try {
+        const quizRef = doc(db, "quizzes", quizId);
+        const quizSnap = await getDoc(quizRef);
+        if (quizSnap.exists()) {
+          const data = quizSnap.data();
+          setCurrentTitle(data.title);
+          setCurrentDescription(data.description);
+          setTitle(data.title);
+          setDescription(data.description);
+        } else {
+          Alert.alert("Error", "Quiz not found.");
+          navigation.goBack();
+        }
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+        Alert.alert("Error", "Failed to fetch quiz details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuizDetails();
+  }, []);
 
   const handleUpdateQuiz = async () => {
     if (!title || !description) {
@@ -78,10 +107,32 @@ const UpdateQuizScreen = ({ route, navigation }) => {
             multiline
           />
 
+          {loading ? (
+            <ActivityIndicator size="large" color="#3D5CFF" />
+          ) : (
+            <FormButton
+              labelText="Update Quiz"
+              handleOnPress={handleUpdateQuiz}
+              style={styles.updateButton}
+            />
+          )}
+
           <FormButton
-            labelText="Update Quiz"
-            handleOnPress={handleUpdateQuiz}
-            style={styles.updateButton}
+            labelText="Manage Questions"
+            handleOnPress={() =>
+              navigation.navigate("ManageQuestionsScreen", {
+                quizId: quizId,
+                quizTitle: title,
+              })
+            }
+            style={styles.manageQuestionsButton}
+          />
+
+          <FormButton
+            labelText="Done & Go Home"
+            isPrimary={false}
+            handleOnPress={() => navigation.navigate("TeacherDashboard")}
+            style={{ marginVertical: 20 }}
           />
         </ScrollView>
       </KeyboardAvoidingView>
@@ -121,6 +172,10 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     marginTop: 20,
+  },
+  manageQuestionsButton: {
+    marginTop: 10,
+    backgroundColor: "#3D5CFF",
   },
   loadingContainer: {
     flex: 1,

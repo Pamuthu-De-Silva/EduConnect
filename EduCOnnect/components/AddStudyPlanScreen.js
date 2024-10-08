@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: "#000",
+    borderColor: "#858597",
   },
 
   addTaskButton: {
@@ -275,14 +275,12 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
-    margin:20
-    
+    margin: 20,
   },
   createPlanButtonText: {
     color: "#fff",
     fontSize: 16,
     fontFamily: "Poppins_700Bold",
-    
   },
   bottomNavBarContainer: {
     borderTopWidth: 1,
@@ -320,7 +318,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 20,
     borderWidth: 2,
-    borderColor: "#000",
+    borderColor: "#858597",
     padding: 2, // This will now apply the border around the picker
   },
   modalButtons: {

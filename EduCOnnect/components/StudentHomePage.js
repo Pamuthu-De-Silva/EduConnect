@@ -130,7 +130,7 @@ export default function StudentHomePage() {
 
         <TouchableOpacity
           style={styles.quizButton}
-          onPress={() => navigation.navigate("AddStudyPlanScreen")} // Navigating to PlayQuizScreen
+          onPress={() => navigation.navigate("StudyPlanerProgress")} // Navigating to PlayQuizScreen
         >
           <Icon name="schedule" size={40} color="#fff" />
           <Text style={styles.quizTitle}>Study Planner</Text>

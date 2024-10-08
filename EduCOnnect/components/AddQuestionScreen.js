@@ -1,38 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   KeyboardAvoidingView,
   ScrollView,
-  TouchableOpacity,
-  Image,
   Alert,
   ActivityIndicator,
 } from "react-native";
-import {
-  useFonts,
-  Poppins_400Regular,
-  Poppins_700Bold,
-} from "@expo-google-fonts/poppins";
-import { launchImageLibrary } from "expo-image-picker";
 import { collection, addDoc } from "firebase/firestore";
-import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../firebaseConfig";
+import { db } from "../firebaseConfig";
 import FormInput from "../components/shared/FormInput";
 import FormButton from "../components/shared/FormButton";
 
 const AddQuestionScreen = ({ navigation, route }) => {
-  const [currentQuizId] = useState(route.params.currentQuizId); // Stay the same across multiple questions
-  const [currentQuizTitle] = useState(route.params.currentQuizTitle);
+  const quizId = route.params?.quizId || null; // Get quizId from route params
+  const quizTitle = route.params?.quizTitle || ""; // Get quizTitle from route params
+
+  useEffect(() => {
+    console.log("Received quizId: ", quizId); // Debug log to confirm quizId is passed correctly
+    if (!quizId) {
+      Alert.alert("Error", "Invalid quiz ID. Please try again.");
+    }
+  }, [quizId]);
 
   const [question, setQuestion] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [optionTwo, setOptionTwo] = useState("");
   const [optionThree, setOptionThree] = useState("");
   const [optionFour, setOptionFour] = useState("");
-  const [imageUri, setImageUri] = useState("");
   const [uploading, setUploading] = useState(false);
-  const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
   const handleQuestionSave = async () => {
     if (
@@ -46,61 +42,30 @@ const AddQuestionScreen = ({ navigation, route }) => {
       return;
     }
 
-    setUploading(true);
-    const currentQuestionId = Math.floor(
-      100000 + Math.random() * 9000
-    ).toString();
-    let imageUrl = "";
-
-    if (imageUri) {
-      const storageRef = ref(
-        storage,
-        `images/questions/${currentQuizId}_${currentQuestionId}`
-      );
-      const img = await fetch(imageUri);
-      const imgBlob = await img.blob();
-      const uploadTask = uploadBytesResumable(storageRef, imgBlob);
-
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Upload is ${progress}% done`);
-        },
-        (error) => {
-          console.error("Upload failed:", error);
-          setUploading(false);
-        },
-        async () => {
-          imageUrl = await getDownloadURL(uploadTask.snapshot.ref);
-          saveQuestionToDatabase(imageUrl);
-        }
-      );
-    } else {
-      saveQuestionToDatabase(imageUrl);
+    if (!quizId) {
+      Alert.alert("Error", "Invalid quiz ID. Please try again.");
+      return;
     }
-  };
 
-  const saveQuestionToDatabase = async (imageUrl) => {
+    setUploading(true);
+
     try {
-      await addDoc(collection(db, "quizzes", currentQuizId, "questions"), {
+      await addDoc(collection(db, "quizzes", quizId, "questions"), {
         question: question,
         correct_answer: correctAnswer,
         incorrect_answers: [optionTwo, optionThree, optionFour],
-        imageUrl: imageUrl,
       });
+
       Alert.alert("Success", "Question saved successfully!");
       resetForm();
 
-      // Allow the user to add another question
-      navigation.navigate("AddQuestionScreen", {
-        currentQuizId: currentQuizId,
-        currentQuizTitle: currentQuizTitle,
+      navigation.replace("AddQuestionScreen", {
+        quizId: quizId,
+        quizTitle: quizTitle,
       });
     } catch (error) {
       console.error("Error saving question:", error);
-      Alert.alert("Error", "Failed to save question.");
+      Alert.alert("Error", `Failed to save question: ${error.message}`);
     } finally {
       setUploading(false);
     }
@@ -112,31 +77,14 @@ const AddQuestionScreen = ({ navigation, route }) => {
     setOptionTwo("");
     setOptionThree("");
     setOptionFour("");
-    setImageUri("");
   };
-
-  const selectImage = async () => {
-    let result = await launchImageLibrary({ mediaType: "photo" });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setImageUri(result.assets[0].uri);
-    }
-  };
-
-  if (!fontsLoaded) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3D5CFF" />
-        <Text style={styles.loadingText}>Loading Fonts...</Text>
-      </View>
-    );
-  }
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1, backgroundColor: "#1F1F39" }}>
         <View style={{ padding: 20 }}>
           <Text style={styles.title}>Add Question</Text>
-          <Text style={styles.subtitle}>For {currentQuizTitle}</Text>
+          <Text style={styles.subtitle}>For {quizTitle}</Text>
 
           <FormInput
             labelText="Question"
@@ -144,21 +92,6 @@ const AddQuestionScreen = ({ navigation, route }) => {
             onChangeText={(val) => setQuestion(val)}
             value={question}
           />
-
-          {imageUri ? (
-            <Image
-              source={{ uri: imageUri }}
-              style={styles.imagePreview}
-              resizeMode="cover"
-            />
-          ) : (
-            <TouchableOpacity
-              style={styles.addImageButton}
-              onPress={selectImage}
-            >
-              <Text style={styles.addImageText}>+ Add Image</Text>
-            </TouchableOpacity>
-          )}
 
           <FormInput
             labelText="Correct Answer"
@@ -217,33 +150,6 @@ const styles = {
     textAlign: "center",
     color: "#fff",
     marginBottom: 20,
-  },
-  addImageButton: {
-    backgroundColor: "#3D5CFF",
-    alignItems: "center",
-    padding: 20,
-    marginVertical: 15,
-    borderRadius: 5,
-  },
-  addImageText: {
-    color: "#fff",
-    opacity: 0.7,
-  },
-  imagePreview: {
-    width: "100%",
-    height: 200,
-    marginVertical: 10,
-    borderRadius: 5,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1F1F39",
-  },
-  loadingText: {
-    color: "#fff",
-    marginTop: 10,
   },
 };
 

@@ -1,4 +1,4 @@
-// AllQuizzesScreenTeacher.js
+// ManageQuestionsScreen.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -11,10 +11,10 @@ import {
   StyleSheet,
   Alert,
 } from "react-native";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore"; // Firebase Firestore methods
-import { db } from "../firebaseConfig"; // Firestore configuration
-import FormButton from "../components/shared/FormButton"; // Your shared button component
-import Icon from "react-native-vector-icons/MaterialIcons"; // Import the icon library
+import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { db } from "../firebaseConfig";
+import FormButton from "../components/shared/FormButton";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import {
   useFonts,
   Poppins_400Regular,
@@ -22,25 +22,28 @@ import {
 } from "@expo-google-fonts/poppins";
 import BottomNavBarTeacher from "./BottemNavBarTeacher";
 
-const AllQuizzesScreenTeacher = ({ navigation }) => {
-  const [allQuizzes, setAllQuizzes] = useState([]);
+const ManageQuestionsScreen = ({ route, navigation }) => {
+  const { quizId, quizTitle } = route.params; // Fetch quizId and quizTitle from route parameters
+  const [allQuestions, setAllQuestions] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
-  // Fetch all quizzes from Firestore
-  const getAllQuizzes = async () => {
+  // Fetch all questions from Firestore
+  const getAllQuestions = async () => {
     setRefreshing(true);
     try {
-      const quizSnapshot = await getDocs(collection(db, "quizzes"));
-      let tempQuizzes = [];
-      quizSnapshot.forEach((doc) => {
-        tempQuizzes.push({ id: doc.id, ...doc.data() });
+      const questionsSnapshot = await getDocs(
+        collection(db, "quizzes", quizId, "questions")
+      );
+      let tempQuestions = [];
+      questionsSnapshot.forEach((doc) => {
+        tempQuestions.push({ id: doc.id, ...doc.data() });
       });
-      setAllQuizzes(tempQuizzes);
+      setAllQuestions(tempQuestions);
     } catch (error) {
-      console.error("Error fetching quizzes:", error);
-      Alert.alert("Error", "Failed to fetch quizzes.");
+      console.error("Error fetching questions:", error);
+      Alert.alert("Error", "Failed to fetch questions.");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -48,26 +51,28 @@ const AllQuizzesScreenTeacher = ({ navigation }) => {
   };
 
   useEffect(() => {
-    getAllQuizzes();
+    getAllQuestions();
   }, []);
 
-  // Delete Quiz function
-  const handleDeleteQuiz = async (quizId) => {
+  // Delete Question function
+  const handleDeleteQuestion = async (questionId) => {
     Alert.alert(
-      "Delete Quiz",
-      "Are you sure you want to delete this quiz?",
+      "Delete Question",
+      "Are you sure you want to delete this question?",
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           onPress: async () => {
             try {
-              await deleteDoc(doc(db, "quizzes", quizId));
-              Alert.alert("Success", "Quiz deleted successfully!");
-              getAllQuizzes(); // Refresh quizzes
+              await deleteDoc(
+                doc(db, "quizzes", quizId, "questions", questionId)
+              );
+              Alert.alert("Success", "Question deleted successfully!");
+              getAllQuestions(); // Refresh questions
             } catch (error) {
-              console.error("Error deleting quiz:", error);
-              Alert.alert("Error", "Failed to delete quiz.");
+              console.error("Error deleting question:", error);
+              Alert.alert("Error", "Failed to delete question.");
             }
           },
         },
@@ -80,7 +85,7 @@ const AllQuizzesScreenTeacher = ({ navigation }) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#3D5CFF" />
-        <Text style={styles.loadingText}>Loading Quizzes...</Text>
+        <Text style={styles.loadingText}>Loading Questions...</Text>
       </View>
     );
   }
@@ -90,42 +95,45 @@ const AllQuizzesScreenTeacher = ({ navigation }) => {
       <StatusBar backgroundColor="#1F1F39" barStyle={"light-content"} />
 
       <View style={styles.header}>
-        <Text style={styles.headerText}>All Quizzes</Text>
+        <Text style={styles.headerText}></Text>
 
-        {/* Create Quiz Button at the top-right */}
+        {/* Add Question Button */}
         <FormButton
-          labelText="Create Quiz"
-          style={styles.createQuizButton}
-          handleOnPress={() => navigation.navigate("AddQuiz")}
+          labelText="Add Question"
+          style={styles.addQuestionButton}
+          handleOnPress={() =>
+            navigation.navigate("AddQuestionScreen", {
+              quizId: quizId, // Pass quizId correctly
+              quizTitle: quizTitle, // Pass quizTitle correctly
+            })
+          }
         />
       </View>
 
-      {/* Subtitle for "Your Quizzes" */}
-      <Text style={styles.subtitle}>Your Quizzes</Text>
+      {/* Subtitle */}
+      <Text style={styles.subtitle}>Questions for "{quizTitle}"</Text>
 
       <FlatList
-        data={allQuizzes}
-        onRefresh={getAllQuizzes}
+        data={allQuestions}
+        onRefresh={getAllQuestions}
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
-        style={styles.quizList}
-        renderItem={({ item: quiz }) => (
-          <View style={styles.quizCard}>
+        style={styles.questionList}
+        renderItem={({ item: question }) => (
+          <View style={styles.questionCard}>
             <View style={{ flex: 1, paddingRight: 10 }}>
-              <Text style={styles.quizTitle}>{quiz.title}</Text>
-              {quiz.description !== "" && (
-                <Text style={styles.quizDescription}>{quiz.description}</Text>
-              )}
+              <Text style={styles.questionText}>{question.question}</Text>
             </View>
             <View style={styles.buttonGroup}>
-              {/* Update Button with Icon */}
+              {/* Edit Button with Icon */}
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => {
-                  navigation.navigate("UpdateQuizScreen", {
-                    quizId: quiz.id,
-                  });
-                }}
+                onPress={() =>
+                  navigation.navigate("EditQuestionScreen", {
+                    quizId: quizId,
+                    questionId: question.id,
+                  })
+                }
               >
                 <Icon name="edit" size={24} color="#3D5CFF" />
               </TouchableOpacity>
@@ -133,7 +141,7 @@ const AllQuizzesScreenTeacher = ({ navigation }) => {
               {/* Delete Button with Icon */}
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => handleDeleteQuiz(quiz.id)}
+                onPress={() => handleDeleteQuestion(question.id)}
               >
                 <Icon name="delete" size={24} color="#FF3D71" />
               </TouchableOpacity>
@@ -153,7 +161,7 @@ const AllQuizzesScreenTeacher = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1F1F39", // Dark theme background
+    backgroundColor: "#1F1F39",
   },
   loadingContainer: {
     flex: 1,
@@ -169,24 +177,19 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: "#3D5CFF",
     padding: 20,
-    flexDirection: "row", // To position the title and button side by side
-    justifyContent: "space-between", // Push the button to the right
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     marginTop: 30,
     marginBottom: 30,
   },
-  headerText: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontFamily: "Poppins_700Bold",
-  },
-  createQuizButton: {
+  addQuestionButton: {
     borderRadius: 50,
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: "#FF6905", // Button color changed to make it stand out
+    backgroundColor: "#FF6905",
   },
   subtitle: {
     color: "#FFFFFF",
@@ -195,45 +198,40 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginTop: 20,
   },
-  quizList: {
+  questionList: {
     paddingVertical: 20,
   },
-  quizCard: {
+  questionCard: {
     padding: 20,
     borderRadius: 8,
     marginVertical: 10,
     marginHorizontal: 15,
-    backgroundColor: "#292C4D", // Card background to match the dark theme
+    backgroundColor: "#292C4D",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    elevation: 4, // Shadow for iOS and Android
+    elevation: 4,
   },
-  quizTitle: {
-    fontSize: 18,
-    color: "#FFFFFF", // White text for quiz title
-    fontFamily: "Poppins_700Bold",
-  },
-  quizDescription: {
-    color: "#B0B0C3",
+  questionText: {
+    fontSize: 16,
+    color: "#FFFFFF",
     fontFamily: "Poppins_400Regular",
-    marginTop: 5,
   },
   buttonGroup: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-end", // Align buttons to the right
+    justifyContent: "flex-end",
   },
   iconButton: {
-    marginLeft: 10, // Add space between the buttons
+    marginLeft: 10,
   },
   navBarContainer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#1F1F39", // Matching background with the screen
+    backgroundColor: "#1F1F39",
   },
 });
 
-export default AllQuizzesScreenTeacher;
+export default ManageQuestionsScreen;
