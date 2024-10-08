@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import BottomNavBarTeacher from "./BottemNavBarTeacher"; // Assuming you have a custom bottom nav component
+import BottomNavBarTeacher from "./BottomNavBar"; // Assuming you have a custom bottom nav component
 import Icon from "react-native-vector-icons/MaterialIcons"; // For the quiz icon
 
 export default function ResourcesPage({ navigation }) {
