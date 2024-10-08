@@ -6,10 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { db, auth } from "../firebaseConfig";
 import { collection, addDoc } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
+import BottomNavBar from "./BottemNavBarTeacher"; // Importing BottomNavBar
 
 export default function CreateCourseScreen() {
   const [courseName, setCourseName] = useState("");
@@ -41,37 +44,51 @@ export default function CreateCourseScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create a New Course</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={styles.innerContainer}>
+        <Text style={styles.title}>Create a New Course</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Course Name"
-        value={courseName}
-        onChangeText={setCourseName}
-        placeholderTextColor="#B0B0C3"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Course Name"
+          value={courseName}
+          onChangeText={setCourseName}
+          placeholderTextColor="#B0B0C3"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Course Category"
-        value={courseCategory}
-        onChangeText={setCourseCategory}
-        placeholderTextColor="#B0B0C3"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Course Category"
+          value={courseCategory}
+          onChangeText={setCourseCategory}
+          placeholderTextColor="#B0B0C3"
+        />
 
-      <TextInput
-        style={styles.input}
-        placeholder="Course Description"
-        value={courseDescription}
-        onChangeText={setCourseDescription}
-        placeholderTextColor="#B0B0C3"
-      />
+        <TextInput
+          style={styles.input}
+          placeholder="Course Description"
+          value={courseDescription}
+          onChangeText={setCourseDescription}
+          placeholderTextColor="#B0B0C3"
+          multiline={true}
+          numberOfLines={4}
+        />
 
-      <TouchableOpacity onPress={handleCreateCourse} style={styles.button}>
-        <Text style={styles.buttonText}>Create Course</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          onPress={handleCreateCourse}
+          style={styles.button}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.buttonText}>Create Course</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Bottom Navigation Bar */}
+      <BottomNavBar />
+    </KeyboardAvoidingView>
   );
 }
 
@@ -79,6 +96,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1F1F39",
+    justifyContent: "space-between",
+    marginTop:25
+  },
+  innerContainer: {
     padding: 20,
     justifyContent: "center",
   },
@@ -94,18 +115,21 @@ const styles = StyleSheet.create({
     color: "#fff",
     padding: 15,
     marginVertical: 10,
-    borderRadius: 5,
+    borderRadius: 10,
+    fontSize: 16,
+    fontFamily: "Poppins_400Regular",
   },
   button: {
     backgroundColor: "#3D5CFF",
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: "center",
     marginTop: 20,
+    elevation: 5,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "Poppins_700Bold",
   },
 });

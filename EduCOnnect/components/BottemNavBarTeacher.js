@@ -86,7 +86,7 @@ export default function BottomNavBar() {
       {/* Account Button */}
       <TouchableOpacity
         style={styles.navButton}
-        onPress={() => navigation.navigate("Account")}
+        onPress={() => navigation.navigate("ProfileScreen")}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >

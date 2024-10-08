@@ -24,6 +24,8 @@ import StudyPlannerUpdate from "./components/StudyPlannerUpdate";
 import EditQuestionScreen from "./components/EditQuestionScreen";
 import ManageQuestionsScreen from "./components/ManageQuestionsScreen";
 import CreateCourseScreen from "./components/CreateCourseScreen";
+import CourseDetailScreen from "./components/CourseDetailScreen";
+import AddQuestionScreenfirst from "./components/ADDQuestionFirstTime";
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -83,6 +85,16 @@ export default function Navigation() {
         <Stack.Screen
           name="CreateCourseScreen"
           component={CreateCourseScreen}
+        />
+
+        <Stack.Screen
+          name="CourseDetailScreen"
+          component={CourseDetailScreen}
+        />
+
+        <Stack.Screen
+          name="AddQuestionScreenfirst"
+          component={AddQuestionScreenfirst}
         />
       </Stack.Navigator>
     </NavigationContainer>

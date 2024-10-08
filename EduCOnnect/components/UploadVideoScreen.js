@@ -7,18 +7,22 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  Dimensions,
+  ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Video } from "expo-av";
 import { db, storage } from "../firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, updateDoc } from "firebase/firestore";
+import BottomNavBar from "./BottomNavBar"; // Importing BottomNavBar
 
 export default function UploadVideoScreen({ route }) {
   const { courseId } = route.params; // Get courseId from params
   const [videoFiles, setVideoFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({});
+  const screenWidth = Dimensions.get("window").width;
 
   const handleSelectVideo = async () => {
     try {
@@ -104,51 +108,61 @@ export default function UploadVideoScreen({ route }) {
     }
   };
 
-
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Upload Videos to Course</Text>
+      <ScrollView contentContainerStyle={styles.contentContainer}>
+        <Text style={styles.title}>Upload Videos to Course</Text>
 
-      <TouchableOpacity onPress={handleSelectVideo} style={styles.button}>
-        <Text style={styles.buttonText}>Select Videos</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={handleSelectVideo} style={styles.button}>
+          <Text style={styles.buttonText}>Select Videos</Text>
+        </TouchableOpacity>
 
-      {videoFiles.length > 0 && (
-        <FlatList
-          data={videoFiles}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.uploadedVideoContainer}>
-              <Text style={styles.videoTitle}>
-                {item.filename || "Selected Video"}
-              </Text>
-              <Video
-                source={{ uri: item.uri }}
-                style={styles.uploadedVideo}
-                useNativeControls
-                resizeMode="contain"
-              />
-              {uploading && (
-                <View style={styles.progressContainer}>
-                  <Text style={styles.progressText}>
-                    {progress[item.uri]
-                      ? `Uploading: ${Math.round(progress[item.uri])}%`
-                      : "Waiting to upload..."}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-        />
-      )}
+        {videoFiles.length > 0 && (
+          <FlatList
+            data={videoFiles}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item }) => (
+              <View style={styles.uploadedVideoContainer}>
+                <Text style={styles.videoTitle}>
+                  {item.filename || "Selected Video"}
+                </Text>
+                <Video
+                  source={{ uri: item.uri }}
+                  style={[styles.uploadedVideo, { width: screenWidth - 40 }]}
+                  useNativeControls
+                  resizeMode="contain"
+                />
+                {uploading && (
+                  <View style={styles.progressContainer}>
+                    <Text style={styles.progressText}>
+                      {progress[item.uri]
+                        ? `Uploading: ${Math.round(progress[item.uri])}%`
+                        : "Waiting to upload..."}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+          />
+        )}
 
-      {uploading && <ActivityIndicator size="large" color="#3D5CFF" />}
+        {uploading && (
+          <ActivityIndicator
+            size="large"
+            color="#3D5CFF"
+            style={styles.loader}
+          />
+        )}
 
-      <TouchableOpacity onPress={handleUploadVideos} style={styles.button}>
-        <Text style={styles.buttonText}>
-          {uploading ? "Uploading Videos..." : "Upload Videos"}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={handleUploadVideos} style={styles.button}>
+          <Text style={styles.buttonText}>
+            {uploading ? "Uploading Videos..." : "Upload Videos"}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Bottom Navigation Bar */}
+      <BottomNavBar style={styles.navBar} />
     </View>
   );
 }
@@ -157,50 +171,72 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1F1F39",
+    marginTop: 20,
+  },
+  contentContainer: {
     padding: 20,
+    paddingBottom: 80,
+    // Extra padding for bottom nav
   },
   title: {
     fontSize: 27,
     color: "#fff",
     fontFamily: "Poppins_700Bold",
     marginBottom: 20,
+    textAlign: "center",
   },
   button: {
     backgroundColor: "#3D5CFF",
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
     fontFamily: "Poppins_700Bold",
   },
   uploadedVideoContainer: {
     backgroundColor: "#292C4D",
     padding: 15,
-    borderRadius: 5,
-    marginBottom: 15,
+    borderRadius: 10,
+    marginBottom: 20,
+    alignItems: "center",
   },
   videoTitle: {
     color: "#fff",
     fontFamily: "Poppins_700Bold",
-    marginBottom: 5,
+    marginBottom: 10,
+    fontSize: 16,
   },
   uploadedVideo: {
-    width: "100%",
-    height: 150,
+    height: 200,
+    borderRadius: 10,
   },
   progressContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
     marginVertical: 10,
+    alignItems: "center",
   },
   progressText: {
     color: "#fff",
-    marginLeft: 10,
+    fontSize: 14,
     fontFamily: "Poppins_400Regular",
+  },
+  loader: {
+    marginVertical: 20,
+  },
+  navBar: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
   },
 });

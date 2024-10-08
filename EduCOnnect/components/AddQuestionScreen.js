@@ -16,10 +16,15 @@ const AddQuestionScreen = ({ navigation, route }) => {
   const quizId = route.params?.quizId || null; // Get quizId from route params
   const quizTitle = route.params?.quizTitle || ""; // Get quizTitle from route params
 
+  // Check for quizId once the screen is loaded
   useEffect(() => {
     console.log("Received quizId: ", quizId); // Debug log to confirm quizId is passed correctly
     if (!quizId) {
-      Alert.alert("Error", "Invalid quiz ID. Please try again.");
+      Alert.alert(
+        "Error",
+        "No quiz ID provided. Please go back and create/select a valid quiz."
+      );
+      navigation.goBack(); // Go back if no quizId is provided
     }
   }, [quizId]);
 
@@ -30,6 +35,7 @@ const AddQuestionScreen = ({ navigation, route }) => {
   const [optionFour, setOptionFour] = useState("");
   const [uploading, setUploading] = useState(false);
 
+  // Handle adding a question
   const handleQuestionSave = async () => {
     if (
       !question ||
@@ -39,11 +45,6 @@ const AddQuestionScreen = ({ navigation, route }) => {
       !optionFour
     ) {
       Alert.alert("Error", "Please fill in all fields.");
-      return;
-    }
-
-    if (!quizId) {
-      Alert.alert("Error", "Invalid quiz ID. Please try again.");
       return;
     }
 
@@ -59,6 +60,7 @@ const AddQuestionScreen = ({ navigation, route }) => {
       Alert.alert("Success", "Question saved successfully!");
       resetForm();
 
+      // Navigate back to the same screen to add another question
       navigation.replace("AddQuestionScreen", {
         quizId: quizId,
         quizTitle: quizTitle,
@@ -71,6 +73,7 @@ const AddQuestionScreen = ({ navigation, route }) => {
     }
   };
 
+  // Reset the form after saving
   const resetForm = () => {
     setQuestion("");
     setCorrectAnswer("");

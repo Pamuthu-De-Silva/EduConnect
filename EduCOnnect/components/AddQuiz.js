@@ -9,11 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import {
-  useFonts,
-  Poppins_400Regular,
-  Poppins_700Bold,
-} from "@expo-google-fonts/poppins";
+import { useFonts, Poppins_400Regular, Poppins_700Bold } from "@expo-google-fonts/poppins";
 import { collection, addDoc } from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
 import BottomNavBarTeacher from "./BottemNavBarTeacher";
@@ -48,7 +44,7 @@ export default function CreateQuiz({ navigation }) {
       Alert.alert("Success", "Quiz created successfully!");
 
       // Navigate to AddQuestionScreen with quizId and quizTitle
-      navigation.navigate("AddQuestionScreen", {
+      navigation.navigate("AddQuestionScreenfirst", {
         currentQuizId: createdQuizId,
         currentQuizTitle: quizTitle,
       });

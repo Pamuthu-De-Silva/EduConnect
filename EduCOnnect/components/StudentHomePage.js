@@ -8,7 +8,7 @@ import {
   Dimensions,
   TextInput,
   TouchableOpacity,
-  RefreshControl, // Import RefreshControl
+  RefreshControl,
 } from "react-native";
 import BottomNavBar from "./BottomNavBar";
 import { StatusBar } from "expo-status-bar";
@@ -16,7 +16,7 @@ import { Video } from "expo-av";
 import { db } from "../firebaseConfig";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import Icon from "react-native-vector-icons/MaterialIcons"; 
+import Icon from "react-native-vector-icons/MaterialIcons";
 const { width } = Dimensions.get("window");
 
 const banners = [
@@ -28,7 +28,7 @@ const banners = [
 export default function StudentHomePage() {
   const scrollRef = useRef(null);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-  const [lectures, setLectures] = useState([]);
+  const [courses, setCourses] = useState([]); // Change from lectures to courses
   const [refreshing, setRefreshing] = useState(false); // State for refreshing
   const navigation = useNavigation(); // Initialize navigation
 
@@ -47,30 +47,36 @@ export default function StudentHomePage() {
     return () => clearInterval(interval);
   }, [currentBannerIndex]);
 
-  const fetchLectures = () => {
-    const q = query(collection(db, "lectures"));
+  // Fetch all courses
+  const fetchCourses = () => {
+    const q = query(collection(db, "courses")); // Fetch courses instead of lectures
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const fetchedLectures = [];
+      const fetchedCourses = [];
       querySnapshot.forEach((doc) => {
-        fetchedLectures.push({ id: doc.id, ...doc.data() });
+        fetchedCourses.push({ id: doc.id, ...doc.data() });
       });
-      setLectures(fetchedLectures);
+      setCourses(fetchedCourses);
     });
     return unsubscribe;
   };
 
   useEffect(() => {
-    const unsubscribe = fetchLectures();
+    const unsubscribe = fetchCourses();
     return () => unsubscribe();
   }, []);
 
   // Function to handle refresh
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchLectures(); // Fetch the lectures again
+    fetchCourses(); // Fetch the courses again
     setTimeout(() => {
       setRefreshing(false); // Set refreshing to false after data is reloaded
     }, 1000); // Simulate network delay
+  };
+
+  // Navigate to video play screen when student clicks a course
+  const navigateToCourseDetails = (course) => {
+    navigation.navigate("CourseDetailScreen", { course }); // Navigate to the new screen with course details
   };
 
   return (
@@ -79,7 +85,7 @@ export default function StudentHomePage() {
       <ScrollView
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} /> // Add RefreshControl
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
       >
         {/* Header Section */}
@@ -130,7 +136,7 @@ export default function StudentHomePage() {
 
         <TouchableOpacity
           style={styles.quizButton}
-          onPress={() => navigation.navigate("StudyPlanerProgress")} // Navigating to PlayQuizScreen
+          onPress={() => navigation.navigate("StudyPlanerProgress")}
         >
           <Icon name="schedule" size={40} color="#fff" />
           <Text style={styles.quizTitle}>Study Planner</Text>
@@ -142,27 +148,31 @@ export default function StudentHomePage() {
         {/* "Popular Courses" Section */}
         <View style={styles.roundedContainer}>
           <Text style={styles.sectionTitle}>Our most popular courses</Text>
-          {lectures.length > 0 ? (
-            lectures.map((lecture) => (
+          {courses.length > 0 ? (
+            courses.map((course) => (
               <TouchableOpacity
-                key={lecture.id}
+                key={course.id}
                 style={styles.lectureWrapper}
-                onPress={() =>
-                  navigation.navigate("LectureDetailScreen", { lecture })
-                } // Navigate to detail screen
+                onPress={() => navigateToCourseDetails(course)} // Navigate to the detail screen
               >
-                <Video
-                  source={{ uri: lecture.videoURL }} // Video URL from the lecture data
-                  style={styles.thumbnailImage}
-                  useNativeControls
-                  resizeMode="cover"
-                  isLooping
-                  shouldPlay={false}
-                />
+                {course.videoURLs && course.videoURLs.length > 0 ? (
+                  <Video
+                    source={{ uri: course.videoURLs[0] }} // Display first video as preview
+                    style={styles.thumbnailImage}
+                    useNativeControls={false}
+                    resizeMode="cover"
+                    isLooping={false}
+                    shouldPlay={false}
+                  />
+                ) : (
+                  <View style={styles.lectureThumbnailPlaceholder}>
+                    <Text style={styles.thumbnailText}>No Preview</Text>
+                  </View>
+                )}
                 <View style={styles.detailsContainer}>
-                  <Text style={styles.courseTitle}>{lecture.name}</Text>
+                  <Text style={styles.courseTitle}>{course.name}</Text>
                   <Text style={styles.courseDescription}>
-                    {lecture.description}
+                    {course.description}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -293,16 +303,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   lectureWrapper: {
-    backgroundColor: "#3E3E55", // Updated color to match the UI
+    backgroundColor: "#3E3E55",
     borderRadius: 10,
     padding: 10,
     marginBottom: 10,
     flexDirection: "row",
-    elevation: 5, // Android shadow
-    shadowColor: "#000", // iOS shadow
-    shadowOffset: { width: 0, height: 2 }, // iOS shadow offset
-    shadowOpacity: 0.3, // iOS shadow opacity
-    shadowRadius: 4, // iOS shadow blur
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   thumbnailImage: {
     width: 100,
@@ -320,30 +330,6 @@ const styles = StyleSheet.create({
   courseDescription: {
     color: "#B0B0C3",
     fontFamily: "Poppins_400Regular",
-  },
-  progressContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  learnedText: {
-    color: "#B0B0C3",
-    fontFamily: "Poppins_400Regular",
-  },
-  timeText: {
-    color: "#3D5CFF",
-    fontFamily: "Poppins_400Regular",
-  },
-  progressBar: {
-    height: 10,
-    backgroundColor: "#3E3E55",
-    borderRadius: 5,
-  },
-  progress: {
-    width: "0%",
-    height: "100%",
-    backgroundColor: "#3D5CFF",
-    borderRadius: 5,
   },
   placeholderText: {
     color: "#B0B0C3",
