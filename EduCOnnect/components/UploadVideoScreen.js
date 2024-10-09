@@ -15,15 +15,16 @@ import { Video } from "expo-av";
 import { db, storage } from "../firebaseConfig";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { doc, updateDoc } from "firebase/firestore";
-import BottomNavBar from "./BottomNavBar"; // Importing BottomNavBar
-
+import BottomNavBar from "./BottemNavBarTeacher"; // Importing BottomNavBar
+import TeacherDashboard from "./TeacherDashboard"; 
+import { useNavigation } from "@react-navigation/native";
 export default function UploadVideoScreen({ route }) {
   const { courseId } = route.params; // Get courseId from params
   const [videoFiles, setVideoFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({});
   const screenWidth = Dimensions.get("window").width;
-
+  const navigation = useNavigation();
   const handleSelectVideo = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -101,6 +102,7 @@ export default function UploadVideoScreen({ route }) {
 
       setUploading(false);
       Alert.alert("Success", "All videos uploaded successfully!");
+      navigation.navigate("TeacherDashboard"); 
     } catch (error) {
       console.error("Error uploading videos:", error);
       Alert.alert("Error", error.message);
@@ -110,9 +112,10 @@ export default function UploadVideoScreen({ route }) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>Upload Lectures</Text>
+      </View>
       <ScrollView contentContainerStyle={styles.contentContainer}>
-        <Text style={styles.title}>Upload Videos to Course</Text>
-
         <TouchableOpacity onPress={handleSelectVideo} style={styles.button}>
           <Text style={styles.buttonText}>Select Videos</Text>
         </TouchableOpacity>
@@ -171,10 +174,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1F1F39",
+    
+  },
+  header: {
+    fontSize: 28,
+    color: "#fff",
+    fontFamily: "Poppins_700Bold",
+    textAlign: "center",
+    marginVertical: 20,
     marginTop: 20,
   },
+  headerContainer: {
+    backgroundColor: "#3D5CFF",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingBottom: 10,
+    marginTop: 15,
+    overflow: "visible",
+    paddingTop: 8,
+  },
   contentContainer: {
-    padding: 20,
+    padding: 15,
     paddingBottom: 80,
     // Extra padding for bottom nav
   },

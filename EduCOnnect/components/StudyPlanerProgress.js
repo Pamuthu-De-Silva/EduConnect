@@ -156,7 +156,9 @@ export default function StudyPlanerProgress({ navigation }) {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Text style={styles.header}>Your Progress</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.header}>Your Progress</Text>
+      </View>
 
       {/* Add Plan Button */}
       <TouchableOpacity
@@ -224,21 +226,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1F1F39",
-    padding: 20,
+
     paddingBottom: 80, // Add padding to prevent content from hiding behind navbar
-    marginTop: 25,
   },
   header: {
-    fontSize: 24,
+    fontSize: 28,
     color: "#fff",
     fontFamily: "Poppins_700Bold",
-    marginBottom: 20,
     textAlign: "center",
+    marginVertical: 20,
+    marginTop: 20,
+  },
+  headerContainer: {
+    backgroundColor: "#3D5CFF",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingBottom: 10,
+    marginBottom:40,
+    overflow: "visible",
+    paddingTop: 8,
   },
   planRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 20,
+    
+    paddingLeft: 20,
+    paddingRight:20,
+    paddingBottom:20
   },
   planCard: {
     flex: 1,
@@ -271,6 +285,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     marginBottom: 20,
+    marginRight:20,
+    marginLeft:20
   },
   createPlanButtonText: {
     color: "#fff",

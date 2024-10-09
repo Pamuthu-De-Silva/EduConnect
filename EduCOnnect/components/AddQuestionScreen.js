@@ -85,57 +85,60 @@ const AddQuestionScreen = ({ navigation, route }) => {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1, backgroundColor: "#1F1F39" }}>
-        <View style={{ padding: 20 }}>
-          <Text style={styles.title}>Add Question</Text>
+        <View >
+          <View style={styles.headerContainer}>
+            <Text style={styles.header}>Add Question</Text>
+          </View>
           <Text style={styles.subtitle}>For {quizTitle}</Text>
-
-          <FormInput
-            labelText="Question"
-            placeholderText="Enter the question"
-            onChangeText={(val) => setQuestion(val)}
-            value={question}
-          />
-
-          <FormInput
-            labelText="Correct Answer"
-            placeholderText="Enter the correct answer"
-            onChangeText={(val) => setCorrectAnswer(val)}
-            value={correctAnswer}
-          />
-          <FormInput
-            labelText="Option 2"
-            placeholderText="Enter option 2"
-            onChangeText={(val) => setOptionTwo(val)}
-            value={optionTwo}
-          />
-          <FormInput
-            labelText="Option 3"
-            placeholderText="Enter option 3"
-            onChangeText={(val) => setOptionThree(val)}
-            value={optionThree}
-          />
-          <FormInput
-            labelText="Option 4"
-            placeholderText="Enter option 4"
-            onChangeText={(val) => setOptionFour(val)}
-            value={optionFour}
-          />
-
-          {uploading ? (
-            <ActivityIndicator size="large" color="#fff" />
-          ) : (
-            <FormButton
-              labelText="Save Question"
-              handleOnPress={handleQuestionSave}
+          <View style={styles.subContainer}>
+            <FormInput
+              labelText="Question"
+              placeholderText="Enter the question"
+              onChangeText={(val) => setQuestion(val)}
+              value={question}
             />
-          )}
 
-          <FormButton
-            labelText="Done & Go Home"
-            isPrimary={false}
-            handleOnPress={() => navigation.navigate("TeacherDashboard")}
-            style={{ marginVertical: 20 }}
-          />
+            <FormInput
+              labelText="Correct Answer"
+              placeholderText="Enter the correct answer"
+              onChangeText={(val) => setCorrectAnswer(val)}
+              value={correctAnswer}
+            />
+            <FormInput
+              labelText="Option 2"
+              placeholderText="Enter option 2"
+              onChangeText={(val) => setOptionTwo(val)}
+              value={optionTwo}
+            />
+            <FormInput
+              labelText="Option 3"
+              placeholderText="Enter option 3"
+              onChangeText={(val) => setOptionThree(val)}
+              value={optionThree}
+            />
+            <FormInput
+              labelText="Option 4"
+              placeholderText="Enter option 4"
+              onChangeText={(val) => setOptionFour(val)}
+              value={optionFour}
+            />
+
+            {uploading ? (
+              <ActivityIndicator size="large" color="#fff" />
+            ) : (
+              <FormButton
+                labelText="Save Question"
+                handleOnPress={handleQuestionSave}
+              />
+            )}
+
+            <FormButton
+              labelText="Done & Go Home"
+              isPrimary={false}
+              handleOnPress={() => navigation.navigate("TeacherDashboard")}
+              style={{ marginVertical: 20 }}
+            />
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -153,6 +156,26 @@ const styles = {
     textAlign: "center",
     color: "#fff",
     marginBottom: 20,
+  },
+  header: {
+    fontSize: 28,
+    color: "#fff",
+    fontFamily: "Poppins_700Bold",
+    textAlign: "center",
+    marginVertical: 20,
+   
+    paddingTop: 20,
+  },
+  headerContainer: {
+    backgroundColor: "#3D5CFF",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingBottom: 10,
+    overflow: "visible",
+    paddingTop: 8,
+  },
+  subContainer: {
+    marginHorizontal: 20,
   },
 };
 

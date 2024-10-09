@@ -29,21 +29,26 @@ export default function OnboardScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.contentContainer}>
-        <Image
-          source={require('../assets/landing.png')}
-          style={styles.image}
-        />
-        <Text style={styles.text}>Create your own{'\n'}Study Plan</Text>
+        <Image source={require("../assets/landing.png")} style={styles.image} />
+        <Text style={styles.text}>Unlock Your Learning {"\n"}Potential</Text>
         <Text style={styles.textdescription}>
-          Study according to the {'\n'}study plan, make study {'\n'}more motivated
+          Access a variety of learning tools {"\n"}and resources to stay on top
+          of {"\n"}
+          your studies and beyond.
         </Text>
 
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.buttonLogin} onPress={handleLoginPress}>
+          <TouchableOpacity
+            style={styles.buttonLogin}
+            onPress={handleLoginPress}
+          >
             <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.buttonSignUp} onPress={handleSignUpPress}>
+          <TouchableOpacity
+            style={styles.buttonSignUp}
+            onPress={handleSignUpPress}
+          >
             <Text style={styles.buttonText}>Sign Up</Text>
           </TouchableOpacity>
         </View>

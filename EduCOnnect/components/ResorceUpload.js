@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   ScrollView,
   Linking,
+  Modal,
 } from "react-native";
 import {
   useFonts,
@@ -31,9 +32,12 @@ import {
   onSnapshot,
   doc,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import BottomNavBarTeacher from "./BottemNavBarTeacher";
-import { WebView } from "react-native-webview"; // Import WebView
+import { WebView } from "react-native-webview";
+import { FontAwesome, Ionicons } from "@expo/vector-icons"; // Icons
+import Feather from "react-native-vector-icons/Feather";
 
 export default function PdfUploadPage() {
   const [pdfName, setPdfName] = useState("");
@@ -44,6 +48,8 @@ export default function PdfUploadPage() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [loadingPdfs, setLoadingPdfs] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editPdfData, setEditPdfData] = useState(null);
 
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
@@ -141,13 +147,48 @@ export default function PdfUploadPage() {
   };
 
   const handleDeletePdf = async (id, pdfURL) => {
+    Alert.alert(
+      "Delete Confirmation",
+      "Are you sure you want to delete this file?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const storageRef = ref(storage, pdfURL);
+              await deleteObject(storageRef);
+              await deleteDoc(doc(db, "pdfs", id));
+              Alert.alert("Deleted", "File deleted successfully.");
+            } catch (error) {
+              Alert.alert("Error", "Failed to delete file.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleEditPdf = (pdf) => {
+    setEditPdfData(pdf);
+    setModalVisible(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editPdfData) return;
+
     try {
-      const storageRef = ref(storage, pdfURL);
-      await deleteObject(storageRef);
-      await deleteDoc(doc(db, "pdfs", id));
-      Alert.alert("Deleted", "File deleted successfully.");
+      const pdfDocRef = doc(db, "pdfs", editPdfData.id);
+      await updateDoc(pdfDocRef, {
+        name: editPdfData.name,
+        category: editPdfData.category,
+        description: editPdfData.description,
+      });
+      setModalVisible(false);
+      Alert.alert("Success", "PDF details updated successfully!");
     } catch (error) {
-      Alert.alert("Error", "Failed to delete file.");
+      Alert.alert("Error", "Failed to update PDF details.");
     }
   };
 
@@ -199,6 +240,7 @@ export default function PdfUploadPage() {
         />
 
         <TouchableOpacity onPress={handleSelectFile} style={styles.button}>
+          <Ionicons name="document-attach" size={24} color="white" />
           <Text style={styles.buttonText}>Select File</Text>
         </TouchableOpacity>
 
@@ -211,42 +253,47 @@ export default function PdfUploadPage() {
           </View>
         ) : (
           <TouchableOpacity onPress={handleUploadPdf} style={styles.button}>
+            <FontAwesome name="upload" size={24} color="white" />
             <Text style={styles.buttonText}>Upload File</Text>
           </TouchableOpacity>
         )}
-        <Text style={styles.buttonText}>Uploaded Documents</Text>
+
+        <Text style={styles.uploadedDocuments}>Uploaded Documents</Text>
         <FlatList
           data={uploadedPdfs}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.uploadedList}
           renderItem={({ item }) => (
             <View style={styles.uploadedPdfContainer}>
-              <View style={styles.previewContainer}>
-                {/* Display PDF preview in WebView */}
+              {/* PDF Preview */}
+              <TouchableOpacity
+                style={styles.previewContainer}
+                onPress={() => Linking.openURL(item.pdfURL)} // Opens PDF on clicking preview
+              >
                 <WebView
                   source={{ uri: item.pdfURL }}
                   style={styles.webViewPdf}
                 />
-              </View>
+              </TouchableOpacity>
+
               <View style={styles.fileDetails}>
                 <Text style={styles.pdfTitle}>{item.name}</Text>
                 <Text style={styles.pdfDescription}>{item.description}</Text>
-                <Text style={styles.uploadedDate}>
-                  Uploaded on {item.uploadDate}
-                </Text>
-                <View style={styles.buttonRow}>
-                  <TouchableOpacity
-                    style={styles.viewButton}
-                    onPress={() => Linking.openURL(item.pdfURL)}
-                  >
-                    <Text style={styles.buttonText}>View PDF</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => handleDeletePdf(item.id, item.pdfURL)}
-                  >
-                    <Text style={styles.buttonText}>Delete</Text>
-                  </TouchableOpacity>
+
+                <View style={styles.iconRow}>
+                  <Feather
+                    name="edit"
+                    size={24}
+                    color="#FFF"
+                    style={{ marginRight: 10 }}
+                    onPress={() => handleEditPdf(item)}
+                  />
+                  <Ionicons
+                    name="trash-outline"
+                    size={24}
+                    color="red"
+                    onPress={() => handleDeletePdf(item.id, item.pdfURL)} // Delete functionality
+                  />
                 </View>
               </View>
             </View>
@@ -255,6 +302,55 @@ export default function PdfUploadPage() {
             <Text style={styles.emptyListText}>No files uploaded yet.</Text>
           }
         />
+
+        {/* Modal for Editing PDF details */}
+        {editPdfData && (
+          <Modal
+            visible={modalVisible}
+            animationType="slide"
+            transparent={true}
+          >
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Edit PDF Details</Text>
+
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="File Name"
+                  value={editPdfData.name}
+                  onChangeText={(text) =>
+                    setEditPdfData({ ...editPdfData, name: text })
+                  }
+                />
+
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="File Category"
+                  value={editPdfData.category}
+                  onChangeText={(text) =>
+                    setEditPdfData({ ...editPdfData, category: text })
+                  }
+                />
+
+                <TextInput
+                  style={styles.modalInput}
+                  placeholder="File Description"
+                  value={editPdfData.description}
+                  onChangeText={(text) =>
+                    setEditPdfData({ ...editPdfData, description: text })
+                  }
+                />
+
+                <TouchableOpacity
+                  onPress={handleSaveEdit}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>Save Changes</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        )}
       </ScrollView>
 
       <BottomNavBarTeacher style={styles.bottomNavBar} />
@@ -303,11 +399,14 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginVertical: 10,
+    flexDirection: "row",
+    justifyContent: "center",
   },
   buttonText: {
     color: "#fff",
     fontFamily: "Poppins_700Bold",
     fontSize: 16,
+    marginLeft: 8,
   },
   progressContainer: {
     flexDirection: "row",
@@ -316,6 +415,12 @@ const styles = StyleSheet.create({
   progressText: {
     color: "#fff",
     marginLeft: 10,
+  },
+  uploadedDocuments: {
+    fontSize: 22,
+    color: "#fff",
+    fontFamily: "Poppins_700Bold",
+    marginVertical: 20,
   },
   uploadedList: {
     marginTop: 20,
@@ -349,31 +454,38 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins_400Regular",
     marginTop: 5,
   },
-  uploadedDate: {
-    color: "#B0B0C3",
-    fontFamily: "Poppins_400Regular",
-    marginTop: 5,
-  },
-  buttonRow: {
+  iconRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     marginTop: 10,
+    
   },
-  viewButton: {
-    backgroundColor: "#3D5CFF",
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: 300,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalInput: {
+    backgroundColor: "#fff",
     padding: 10,
+    marginVertical: 10,
     borderRadius: 5,
-  },
-  deleteButton: {
-    backgroundColor: "#FF3D71",
-    padding: 10,
-    borderRadius: 5,
-  },
-  emptyListText: {
-    color: "#fff",
-    fontFamily: "Poppins_400Regular",
-    textAlign: "center",
-    marginTop: 20,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    width: "100%", // Make all inputs the same width
   },
   bottomNavBar: {
     position: "absolute",

@@ -21,6 +21,8 @@ import {
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
 import BottomNavBarTeacher from "./BottemNavBarTeacher";
+import Feather from "react-native-vector-icons/Feather"; // Icons for modify and delete
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 
 const AllQuizzesScreenTeacher = ({ navigation }) => {
   const [allQuizzes, setAllQuizzes] = useState([]);
@@ -127,7 +129,7 @@ const AllQuizzesScreenTeacher = ({ navigation }) => {
                   });
                 }}
               >
-                <Icon name="edit" size={24} color="#3D5CFF" />
+                <Feather name="edit" size={24} color="#FFF" />
               </TouchableOpacity>
 
               {/* Delete Button with Icon */}
@@ -135,7 +137,7 @@ const AllQuizzesScreenTeacher = ({ navigation }) => {
                 style={styles.iconButton}
                 onPress={() => handleDeleteQuiz(quiz.id)}
               >
-                <Icon name="delete" size={24} color="#FF3D71" />
+                <Ionicons name="trash-outline" size={24} color="red" />
               </TouchableOpacity>
             </View>
           </View>

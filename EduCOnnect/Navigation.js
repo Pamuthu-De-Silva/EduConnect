@@ -20,12 +20,13 @@ import UpdateQuizScreen from "./components/UpdateQuizScreen";
 import ProfileScreen from "./components/ProfileScreen";
 import AddStudyPlanScreen from "./components/AddStudyPlanScreen";
 import StudyPlanerProgress from "./components/StudyPlanerProgress";
-import StudyPlannerUpdate from "./components/StudyPlannerUpdate";
 import EditQuestionScreen from "./components/EditQuestionScreen";
 import ManageQuestionsScreen from "./components/ManageQuestionsScreen";
 import CreateCourseScreen from "./components/CreateCourseScreen";
 import CourseDetailScreen from "./components/CourseDetailScreen";
 import AddQuestionScreenfirst from "./components/ADDQuestionFirstTime";
+import LeaderboardScreen from "./components/LeaderboardScreen";
+import ProfileScreenTeacher from "./components/ProfileScreenTeacher";
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -68,10 +69,6 @@ export default function Navigation() {
           component={StudyPlanerProgress}
         />
 
-        <Stack.Screen
-          name="StudyPlannerUpdate"
-          component={StudyPlannerUpdate}
-        />
 
         <Stack.Screen
           name="EditQuestionScreen"
@@ -96,6 +93,13 @@ export default function Navigation() {
           name="AddQuestionScreenfirst"
           component={AddQuestionScreenfirst}
         />
+
+        <Stack.Screen
+          name="ProfileScreenTeacher"
+          component={ProfileScreenTeacher}
+        />
+
+        <Stack.Screen name="LeaderboardScreen" component={LeaderboardScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

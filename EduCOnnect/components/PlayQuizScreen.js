@@ -9,8 +9,15 @@ import {
   StyleSheet,
   StatusBar,
 } from "react-native";
-import { collection, getDocs } from "firebase/firestore"; // Firestore methods
-import { db } from "../firebaseConfig"; // Firestore configuration
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  getDoc,
+  setDoc,
+} from "firebase/firestore"; // Firestore methods
+import { db, auth } from "../firebaseConfig"; // Firestore configuration and auth
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
 // Utility function to shuffle an array
@@ -22,9 +29,9 @@ const PlayQuizScreen = ({ navigation, route }) => {
   const [questions, setQuestions] = useState([]);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [loading, setLoading] = useState(true);
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(0); // Will calculate based on points now
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const { quizId } = route.params; // Extract quizId from route params
+  const { quizId, quizTitle } = route.params; // Extract quizId and quizTitle from route params
 
   // Fetch questions for the current quiz
   const getQuestionsForQuiz = async () => {
@@ -61,9 +68,8 @@ const PlayQuizScreen = ({ navigation, route }) => {
       [questionId]: selectedOption,
     }));
 
-    if (isCorrect) {
-      setScore((prevScore) => prevScore + 1);
-    }
+    // Update score based on whether the answer is correct or incorrect
+    setScore((prevScore) => (isCorrect ? prevScore + 50 : prevScore - 20));
 
     // Check if quiz is completed
     if (Object.keys(selectedAnswers).length === questions.length - 1) {
@@ -71,15 +77,54 @@ const PlayQuizScreen = ({ navigation, route }) => {
     }
   };
 
+  // Update the user's score in Firestore after the quiz is completed
+  const handleQuizCompletion = async () => {
+    if (quizCompleted) {
+      try {
+        const user = auth.currentUser;
+        const userDocRef = doc(db, "users", user.uid); // Get user document reference
+
+        // Check if the user already has a score
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          // User document exists, update score
+          const currentScore = userDoc.data().score || 0; // If score field doesn't exist, set it to 0
+          const updatedScore = currentScore + score; // Add the new score to the existing score
+          await updateDoc(userDocRef, {
+            score: updatedScore, // Update the score field
+          });
+        } else {
+          // User document doesn't exist, create one with score
+          await setDoc(userDocRef, {
+            score: score, // Set the score field with current score
+          });
+        }
+
+        console.log("Score updated successfully!");
+      } catch (error) {
+        console.error("Error updating score:", error);
+      }
+    }
+  };
+
+  // Call this function when the quiz is completed
+  useEffect(() => {
+    if (quizCompleted) {
+      handleQuizCompletion();
+    }
+  }, [quizCompleted]); // Trigger only when quizCompleted changes
+
   // Get the background color for selected options
   const getOptionBgColor = (questionId, option) => {
     const selectedOption = selectedAnswers[questionId];
+    const correctAnswer = questions.find(
+      (q) => q.id === questionId
+    )?.correct_answer;
     if (!selectedOption) return "#292C4D"; // Default background
     if (selectedOption === option) {
-      return option ===
-        questions.find((q) => q.id === questionId).correct_answer
-        ? "#28a745" // Green for correct answer
-        : "#dc3545"; // Red for incorrect answer
+      return option === correctAnswer ? "#28a745" : "#dc3545"; // Green for correct, red for incorrect
+    } else if (option === correctAnswer) {
+      return "#28a745"; // Keep the correct answer highlighted in green even if not selected
     }
     return "#292C4D";
   };
@@ -96,15 +141,26 @@ const PlayQuizScreen = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#1F1F39" barStyle="light-content" />
 
+      {/* Header Section */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <MaterialIcons name="arrow-back" size={24} color="#FFFFFF" />
+          <MaterialIcons
+            name="arrow-back"
+            size={24}
+            color="#FFFFFF"
+            style={styles.headerArrow}
+          />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Quiz Questions</Text>
+        {/* Display quiz title and current question count */}
+        <Text style={styles.headerTitle}>
+          {quizTitle} - {Object.keys(selectedAnswers).length + 1}/
+          {questions.length}
+        </Text>
       </View>
 
+      {/* Question Section */}
       <FlatList
-        data={questions}
+        data={questions} // Show all questions
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.questionCard}>
@@ -139,13 +195,23 @@ const PlayQuizScreen = ({ navigation, route }) => {
         <View style={styles.resultContainer}>
           <Text style={styles.resultText}>Quiz Completed!</Text>
           <Text style={styles.resultScore}>
-            Your Score: {score}/{questions.length}
+            Your Total Points: {score} points
           </Text>
+
+          {/* 'Go Home' Button */}
           <TouchableOpacity
-            style={styles.homeButton}
-            onPress={() => navigation.navigate("StudentHomePage")}
+            style={[styles.resultButton, styles.homeButton]}
+            onPress={() => navigation.navigate("AllQuizzesScreen")}
           >
-            <Text style={styles.homeButtonText}>Go Home</Text>
+            <Text style={styles.resultButtonText}>Go Back</Text>
+          </TouchableOpacity>
+
+          {/* 'View Leaderboard' Button */}
+          <TouchableOpacity
+            style={[styles.resultButton, styles.leaderboardButton]}
+            onPress={() => navigation.navigate("LeaderboardScreen")}
+          >
+            <Text style={styles.resultButtonText}>View Leaderboard</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -171,15 +237,19 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
+    padding: 30,
     backgroundColor: "#3D5CFF", // Primary color
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+  },
+  headerArrow: {
+    marginTop: 20,
   },
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 18,
     marginLeft: 10,
+    marginTop: 15,
   },
   questionCard: {
     backgroundColor: "#292C4D", // Card background color
@@ -225,16 +295,22 @@ const styles = StyleSheet.create({
     color: "#FFD700", // Gold color for score
     marginVertical: 10,
   },
-  homeButton: {
-    backgroundColor: "#3D5CFF",
+  resultButton: {
     padding: 15,
     borderRadius: 50,
-    marginTop: 20,
+    width: "80%", // Set the same width for both buttons
+    marginTop: 10,
   },
-  homeButtonText: {
+  resultButtonText: {
     color: "#FFFFFF",
     fontSize: 16,
     textAlign: "center",
+  },
+  homeButton: {
+    backgroundColor: "#3D5CFF", // Blue for 'Go Home' button
+  },
+  leaderboardButton: {
+    backgroundColor: "#3D5CFF", // Green for 'View Leaderboard' button
   },
 });
 

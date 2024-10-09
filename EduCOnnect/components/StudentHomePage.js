@@ -17,6 +17,7 @@ import { db } from "../firebaseConfig";
 import { collection, query, onSnapshot } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 import Icon from "react-native-vector-icons/MaterialIcons";
+
 const { width } = Dimensions.get("window");
 
 const banners = [
@@ -28,8 +29,10 @@ const banners = [
 export default function StudentHomePage() {
   const scrollRef = useRef(null);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
-  const [courses, setCourses] = useState([]); // Change from lectures to courses
-  const [refreshing, setRefreshing] = useState(false); // State for refreshing
+  const [courses, setCourses] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [filteredCourses, setFilteredCourses] = useState([]); // State for filtered courses
   const navigation = useNavigation(); // Initialize navigation
 
   useEffect(() => {
@@ -49,13 +52,14 @@ export default function StudentHomePage() {
 
   // Fetch all courses
   const fetchCourses = () => {
-    const q = query(collection(db, "courses")); // Fetch courses instead of lectures
+    const q = query(collection(db, "courses")); // Fetch courses
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const fetchedCourses = [];
       querySnapshot.forEach((doc) => {
         fetchedCourses.push({ id: doc.id, ...doc.data() });
       });
       setCourses(fetchedCourses);
+      setFilteredCourses(fetchedCourses); // Initially, filtered courses are the same as all courses
     });
     return unsubscribe;
   };
@@ -76,7 +80,20 @@ export default function StudentHomePage() {
 
   // Navigate to video play screen when student clicks a course
   const navigateToCourseDetails = (course) => {
-    navigation.navigate("CourseDetailScreen", { course }); // Navigate to the new screen with course details
+    navigation.navigate("CourseDetailScreen", { course });
+  };
+
+  // Handle the search functionality
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (query.trim() === "") {
+      setFilteredCourses(courses); // If search query is empty, show all courses
+    } else {
+      const filtered = courses.filter((course) =>
+        course.name.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredCourses(filtered);
+    }
   };
 
   return (
@@ -104,6 +121,8 @@ export default function StudentHomePage() {
                 style={styles.searchInput}
                 placeholder="Find Course"
                 placeholderTextColor="#B0B0C3"
+                value={searchQuery}
+                onChangeText={handleSearch} // Update search query as user types
               />
               <Image
                 style={styles.filterIcon}
@@ -148,8 +167,8 @@ export default function StudentHomePage() {
         {/* "Popular Courses" Section */}
         <View style={styles.roundedContainer}>
           <Text style={styles.sectionTitle}>Our most popular courses</Text>
-          {courses.length > 0 ? (
-            courses.map((course) => (
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map((course) => (
               <TouchableOpacity
                 key={course.id}
                 style={styles.lectureWrapper}
@@ -179,7 +198,7 @@ export default function StudentHomePage() {
             ))
           ) : (
             <Text style={styles.placeholderText}>
-              No popular courses available.
+              No courses found matching "{searchQuery}".
             </Text>
           )}
         </View>
@@ -334,5 +353,6 @@ const styles = StyleSheet.create({
   placeholderText: {
     color: "#B0B0C3",
     fontFamily: "Poppins_400Regular",
+    textAlign: "center",
   },
 });

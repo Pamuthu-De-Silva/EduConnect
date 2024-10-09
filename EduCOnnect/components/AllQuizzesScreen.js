@@ -8,20 +8,25 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  TextInput,
 } from "react-native";
 import { collection, getDocs } from "firebase/firestore"; // Firebase Firestore methods
 import { db } from "../firebaseConfig"; // Firestore configuration
-import FormButton from "../components/shared/FormButton"; // Your shared button component
 import {
   useFonts,
   Poppins_400Regular,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons"; // Search icon
+import { LinearGradient } from 'expo-linear-gradient'; // Gradient backgrounds
+import BottomNavBar from "./BottomNavBar";
 
 const AllQuizzesScreen = ({ navigation }) => {
   const [allQuizzes, setAllQuizzes] = useState([]);
+  const [filteredQuizzes, setFilteredQuizzes] = useState([]); // State to hold filtered quizzes
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(""); // Search query state
   const [fontsLoaded] = useFonts({ Poppins_400Regular, Poppins_700Bold });
 
   // Fetch all quizzes from Firestore
@@ -33,6 +38,7 @@ const AllQuizzesScreen = ({ navigation }) => {
       tempQuizzes.push({ id: doc.id, ...doc.data() });
     });
     setAllQuizzes(tempQuizzes);
+    setFilteredQuizzes(tempQuizzes); // Set initial filtered quizzes to be all quizzes
     setLoading(false);
     setRefreshing(false);
   };
@@ -40,6 +46,19 @@ const AllQuizzesScreen = ({ navigation }) => {
   useEffect(() => {
     getAllQuizzes();
   }, []);
+
+  // Handle search query change
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    if (query === "") {
+      setFilteredQuizzes(allQuizzes); // If no query, show all quizzes
+    } else {
+      const filtered = allQuizzes.filter((quiz) =>
+        quiz.title.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredQuizzes(filtered);
+    }
+  };
 
   if (!fontsLoaded || loading) {
     return (
@@ -51,15 +70,26 @@ const AllQuizzesScreen = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <LinearGradient colors={["#1F1F39", "#3D5CFF"]} style={styles.container}>
       <StatusBar backgroundColor="#1F1F39" barStyle={"light-content"} />
 
+      {/* Search Input Section */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>All Quizzes</Text>
+        <View style={styles.searchContainer}>
+          <MaterialIcons name="search" size={24} color="#FFFFFF" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search Quizzes"
+            placeholderTextColor="#B0B0C3"
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+        </View>
       </View>
 
+      {/* Quizzes List */}
       <FlatList
-        data={allQuizzes}
+        data={filteredQuizzes}
         onRefresh={getAllQuizzes}
         refreshing={refreshing}
         showsVerticalScrollIndicator={false}
@@ -86,23 +116,21 @@ const AllQuizzesScreen = ({ navigation }) => {
         )}
         keyExtractor={(item) => item.id}
       />
-
-      {/* Button to Create Quiz */}
-      
-    </SafeAreaView>
+      <View>
+        <BottomNavBar />
+      </View>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1F1F39", // Dark theme background
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#1F1F39",
   },
   loadingText: {
     color: "#FFFFFF",
@@ -110,34 +138,50 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   header: {
-    backgroundColor: "#3D5CFF",
-    padding: 20,
+    padding: 40,
     alignItems: "center",
     justifyContent: "center",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    backgroundColor: 'rgba(61, 92, 255, 0.8)', // More transparent background for modern look
   },
-  headerText: {
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#292C4D",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    width: "100%",
+    marginTop:20
+  },
+  searchInput: {
+    flex: 1,
     color: "#FFFFFF",
-    fontSize: 24,
-    fontFamily: "Poppins_700Bold",
+    fontFamily: "Poppins_400Regular",
+    fontSize: 16,
+    marginLeft: 10,
   },
   quizList: {
     paddingVertical: 20,
   },
   quizCard: {
     padding: 20,
-    borderRadius: 8,
+    borderRadius: 12,
     marginVertical: 10,
     marginHorizontal: 15,
-    backgroundColor: "#292C4D", // Card background to match the dark theme
+    backgroundColor: "#2A2B46", // Slightly darker for contrast
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    elevation: 4, // Shadow for iOS and Android
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3.84,
+    elevation: 5, // For better shadow on Android
   },
   quizTitle: {
-    fontSize: 18,
+    fontSize: 20,
     color: "#FFFFFF", // White text for quiz title
     fontFamily: "Poppins_700Bold",
   },
@@ -150,19 +194,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 25,
     borderRadius: 50,
-    backgroundColor: "#3D5CFF", // Primary color for the button
+    backgroundColor: "#FF6B6B", // Brightened color for the button
+    shadowColor: "#FF6B6B",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3.84,
+    elevation: 5, // Adding shadow to button as well
   },
   playButtonText: {
     color: "#FFFFFF",
     fontFamily: "Poppins_700Bold",
-  },
-  createQuizButton: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    borderRadius: 50,
-    paddingHorizontal: 30,
-    backgroundColor: "#3D5CFF", // Primary color for create quiz button
   },
 });
 

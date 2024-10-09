@@ -67,7 +67,9 @@ export default function CreateQuiz({ navigation }) {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>Create New Quiz</Text>
+        <View style={styles.headerContainer}>
+          <Text style={styles.header}>Create New Quiz</Text>
+        </View>
 
         <TextInput
           style={styles.input}
@@ -104,8 +106,27 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#1F1F39",
   },
+  header: {
+    fontSize: 28,
+    color: "#fff",
+    fontFamily: "Poppins_700Bold",
+    textAlign: "center",
+    marginVertical: 20,
+    marginBottom:20,
+    paddingTop:20
+    
+  },
+  headerContainer: {
+    backgroundColor: "#3D5CFF",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingBottom: 10,
+    marginBottom:30,
+    overflow: "visible",
+    paddingTop: 8,
+  },
   scrollContent: {
-    padding: 20,
+    
     paddingBottom: 100,
   },
   loadingContainer: {
@@ -133,6 +154,8 @@ const styles = StyleSheet.create({
     padding: 15,
     marginVertical: 10,
     borderRadius: 5,
+    marginLeft:20,
+    marginRight:20
   },
   button: {
     backgroundColor: "#3D5CFF",
@@ -140,6 +163,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginVertical: 10,
+    marginLeft:20,
+    marginRight:20
   },
   buttonText: {
     color: "#fff",
