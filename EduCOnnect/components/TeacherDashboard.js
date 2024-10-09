@@ -26,8 +26,8 @@ import {
 import { db } from "../firebaseConfig";
 import { Video } from "expo-av";
 import BottomNavBarTeacher from "./BottemNavBarTeacher";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons"; // Icons for modify and delete
-
+import Feather from "react-native-vector-icons/Feather"; // Icons for modify and delete
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 const screenWidth = Dimensions.get("window").width;
 
 export default function TeacherDashboard() {
@@ -39,6 +39,7 @@ export default function TeacherDashboard() {
   const [courseDescription, setCourseDescription] = useState(""); // Edit course description
   const [courseCategory, setCourseCategory] = useState(""); // Edit course category
   const [refreshing, setRefreshing] = useState(false); // State for refresh control
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
   const navigation = useNavigation();
 
   // Data for the Line Chart (you can customize it with real data)
@@ -141,6 +142,11 @@ export default function TeacherDashboard() {
     navigation.navigate("UploadVideoScreen", { courseId });
   };
 
+  // Filter courses based on search query
+  const filteredCourses = courses.filter((course) =>
+    course.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <View style={styles.container}>
       <StatusBar style="light" backgroundColor="#3D5CFF" />
@@ -161,6 +167,8 @@ export default function TeacherDashboard() {
               style={styles.searchInput}
               placeholder="Find Course"
               placeholderTextColor="#B0B0C3"
+              value={searchQuery}
+              onChangeText={setSearchQuery} // Update the search query
             />
             <Image
               style={styles.filterIcon}
@@ -230,8 +238,8 @@ export default function TeacherDashboard() {
         {/* Your Courses Section */}
         <View style={styles.lecturesSection}>
           <Text style={styles.sectionTitle}>Your Courses</Text>
-          {courses.length > 0 ? (
-            courses.map((course) => (
+          {filteredCourses.length > 0 ? (
+            filteredCourses.map((course) => (
               <View key={course.id} style={styles.lectureCard}>
                 {/* Video Preview - Add navigation to UploadVideoScreen */}
                 <TouchableOpacity
@@ -263,19 +271,26 @@ export default function TeacherDashboard() {
                     onPress={() => handleModifyCourse(course)}
                     style={styles.iconButton}
                   >
-                    <MaterialIcons name="edit" size={24} color="#FFF" />
+                    <Feather name="edit" size={24} color="#FFF" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={() => handleDeleteCourse(course)}
                     style={styles.iconButton}
                   >
-                    <MaterialIcons name="delete" size={24} color="#FF6B6B" />
+                    <Ionicons
+                      name="trash-outline"
+                      size={24}
+                      color="red"
+                      
+                    />
                   </TouchableOpacity>
                 </View>
               </View>
             ))
           ) : (
-            <Text style={styles.noCoursesText}>No courses available.</Text>
+            <Text style={styles.noCoursesText}>
+              {searchQuery ? "No courses found." : "No courses available."}
+            </Text>
           )}
         </View>
       </ScrollView>
@@ -397,6 +412,7 @@ const styles = StyleSheet.create({
   iconButton: {
     width: 24,
     height: 24,
+    margin: 5,
   },
   searchContainer: {
     flexDirection: "row",
@@ -569,11 +585,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   input: {
-    backgroundColor: "#3E3E55",
-    padding: 10,
-    borderRadius: 8,
-    color: "#fff",
+    backgroundColor: "#FFFFFF",
+    padding: 15,
+    borderRadius: 10,
+    color: "#000000",
     marginBottom: 10,
+    borderWidth: 2,
+    borderColor: "#858597",
   },
   updateButton: {
     backgroundColor: "#3D5CFF",

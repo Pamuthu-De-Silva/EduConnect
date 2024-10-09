@@ -134,18 +134,21 @@ const AddQuestionScreenfirst = ({ navigation, route }) => {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }}>
       <ScrollView style={{ flex: 1, backgroundColor: "#1F1F39" }}>
-        <View style={{ padding: 20 }}>
-          <Text style={styles.title}>Add Question</Text>
-          <Text style={styles.subtitle}>For {currentQuizTitle}</Text>
+        <View>
+          <View style={styles.headerContainer}>
+            <Text style={styles.header}>Add Question</Text>
+          </View>
+          <View style={styles.subContainer}>
+            <Text style={styles.subtitle}>For {currentQuizTitle}</Text>
 
-          <FormInput
-            labelText="Question"
-            placeholderText="Enter the question"
-            onChangeText={(val) => setQuestion(val)}
-            value={question}
-          />
+            <FormInput
+              labelText="Question"
+              placeholderText="Enter the question"
+              onChangeText={(val) => setQuestion(val)}
+              value={question}
+            />
 
-          {imageUri ? (
+            {/* {imageUri ? (
             <Image
               source={{ uri: imageUri }}
               style={styles.imagePreview}
@@ -158,48 +161,49 @@ const AddQuestionScreenfirst = ({ navigation, route }) => {
             >
               <Text style={styles.addImageText}>+ Add Image</Text>
             </TouchableOpacity>
-          )}
+          )} */}
 
-          <FormInput
-            labelText="Correct Answer"
-            placeholderText="Enter the correct answer"
-            onChangeText={(val) => setCorrectAnswer(val)}
-            value={correctAnswer}
-          />
-          <FormInput
-            labelText="Option 2"
-            placeholderText="Enter option 2"
-            onChangeText={(val) => setOptionTwo(val)}
-            value={optionTwo}
-          />
-          <FormInput
-            labelText="Option 3"
-            placeholderText="Enter option 3"
-            onChangeText={(val) => setOptionThree(val)}
-            value={optionThree}
-          />
-          <FormInput
-            labelText="Option 4"
-            placeholderText="Enter option 4"
-            onChangeText={(val) => setOptionFour(val)}
-            value={optionFour}
-          />
-
-          {uploading ? (
-            <ActivityIndicator size="large" color="#fff" />
-          ) : (
-            <FormButton
-              labelText="Save Question"
-              handleOnPress={handleQuestionSave}
+            <FormInput
+              labelText="Correct Answer"
+              placeholderText="Enter the correct answer"
+              onChangeText={(val) => setCorrectAnswer(val)}
+              value={correctAnswer}
             />
-          )}
+            <FormInput
+              labelText="Option 2"
+              placeholderText="Enter option 2"
+              onChangeText={(val) => setOptionTwo(val)}
+              value={optionTwo}
+            />
+            <FormInput
+              labelText="Option 3"
+              placeholderText="Enter option 3"
+              onChangeText={(val) => setOptionThree(val)}
+              value={optionThree}
+            />
+            <FormInput
+              labelText="Option 4"
+              placeholderText="Enter option 4"
+              onChangeText={(val) => setOptionFour(val)}
+              value={optionFour}
+            />
 
-          <FormButton
-            labelText="Done & Go Home"
-            isPrimary={false}
-            handleOnPress={() => navigation.navigate("TeacherDashboard")}
-            style={{ marginVertical: 20 }}
-          />
+            {uploading ? (
+              <ActivityIndicator size="large" color="#fff" />
+            ) : (
+              <FormButton
+                labelText="Save Question"
+                handleOnPress={handleQuestionSave}
+              />
+            )}
+
+            <FormButton
+              labelText="Done & Go Home"
+              isPrimary={false}
+              handleOnPress={() => navigation.navigate("TeacherDashboard")}
+              style={{ marginVertical: 20 }}
+            />
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -213,10 +217,30 @@ const styles = {
     color: "#fff",
     marginBottom: 10,
   },
+  header: {
+    fontSize: 28,
+    color: "#fff",
+    fontFamily: "Poppins_700Bold",
+    textAlign: "center",
+    marginVertical: 20,
+    marginTop: 20,
+  },
+  headerContainer: {
+    backgroundColor: "#3D5CFF",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingBottom: 10,
+
+    overflow: "visible",
+    paddingTop: 8,
+  },
   subtitle: {
     textAlign: "center",
     color: "#fff",
     marginBottom: 20,
+  },
+  subContainer: {
+    marginHorizontal: 20,
   },
   addImageButton: {
     backgroundColor: "#3D5CFF",

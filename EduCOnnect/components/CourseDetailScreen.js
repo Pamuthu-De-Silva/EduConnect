@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#2F2F42",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    marginBottom:-10
   },
   courseTitle: {
     fontSize: 22,

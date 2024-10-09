@@ -75,9 +75,10 @@ export default function AddStudyPlanScreen({ navigation }) {
 
   return (
     <View style={styles.outerContainer}>
-      <ScrollView style={styles.scrollContainer}>
-        {/* Header */}
+      <View style={styles.headerContainer}>
         <Text style={styles.header}>Set a New Plan</Text>
+      </View>
+      <ScrollView style={styles.scrollContainer}>
         <Text style={styles.subHeader}>Set the deadline</Text>
 
         {/* Date Picker */}
@@ -135,7 +136,6 @@ export default function AddStudyPlanScreen({ navigation }) {
         )}
 
         {/* Create Plan Button */}
-        
       </ScrollView>
       <TouchableOpacity style={styles.createPlanButton} onPress={createPlan}>
         <Text style={styles.createPlanButtonText}>
@@ -200,12 +200,22 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  header: {
-    fontSize: 24,
+   header: {
+    fontSize: 28,
     color: "#fff",
     fontFamily: "Poppins_700Bold",
-    marginBottom: 10,
     textAlign: "center",
+    marginVertical: 20,
+    marginTop: 20,
+  },
+  headerContainer: {
+    backgroundColor: "#3D5CFF",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    paddingBottom: 10,
+    
+    overflow: "visible",
+    paddingTop: 8,
   },
   subHeader: {
     fontSize: 14,
