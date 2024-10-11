@@ -23,11 +23,7 @@ import StudyPlanerProgress from "./components/StudyPlanerProgress";
 import StudyPlannerUpdate from "./components/StudyPlannerUpdate";
 import EditQuestionScreen from "./components/EditQuestionScreen";
 import ManageQuestionsScreen from "./components/ManageQuestionsScreen";
-// import CommunityScreen from './components/CommunityScreen';
 
-// import ChatScreen from "./components/ChatScreen";
-// import StartNewChatScreen from "./components/StartNewChatScreen";
-// import CommunityScreenTeacher from "./components/CommunityScreenTeacher";
 
 
 const Stack = createStackNavigator();
@@ -87,10 +83,7 @@ export default function Navigation() {
           component={ManageQuestionsScreen}
         />
 
-  {/* <Stack.Screen name="CommunityScreen" component={CommunityScreen} />
-  <Stack.Screen name="ChatScreen" component={ChatScreen} />
-  <Stack.Screen name="StartNewChatScreen" component={StartNewChatScreen} />
-  <Stack.Screen name="CommunityScreenTeacher" component={CommunityScreenTeacher} /> */}
+ 
 
       </Stack.Navigator>
     </NavigationContainer>
