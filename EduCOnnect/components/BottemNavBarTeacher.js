@@ -77,7 +77,7 @@ export default function BottomNavBar() {
       {/* Community Button */}
       <TouchableOpacity
         style={styles.navButton}
-        onPress={() => navigation.navigate('CommunityScreenTeacher')}
+        onPress={() => navigation.navigate('Community')}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
