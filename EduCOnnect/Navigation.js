@@ -23,6 +23,11 @@ import StudyPlanerProgress from "./components/StudyPlanerProgress";
 import StudyPlannerUpdate from "./components/StudyPlannerUpdate";
 import EditQuestionScreen from "./components/EditQuestionScreen";
 import ManageQuestionsScreen from "./components/ManageQuestionsScreen";
+import CreateCourseScreen from "./components/CreateCourseScreen";
+import CourseDetailScreen from "./components/CourseDetailScreen";
+import AddQuestionScreenfirst from "./components/ADDQuestionFirstTime";
+import LeaderboardScreen from "./components/LeaderboardScreen";
+import ProfileScreenTeacher from "./components/ProfileScreenTeacher";
 
 
 
@@ -84,6 +89,27 @@ export default function Navigation() {
         />
 
  
+    <Stack.Screen
+          name="CreateCourseScreen"
+          component={CreateCourseScreen}
+        />
+
+        <Stack.Screen
+          name="CourseDetailScreen"
+          component={CourseDetailScreen}
+        />
+
+        <Stack.Screen
+          name="AddQuestionScreenfirst"
+          component={AddQuestionScreenfirst}
+        />
+
+        <Stack.Screen
+          name="ProfileScreenTeacher"
+          component={ProfileScreenTeacher}
+        />
+
+        <Stack.Screen name="LeaderboardScreen" component={LeaderboardScreen} />
 
       </Stack.Navigator>
     </NavigationContainer>
