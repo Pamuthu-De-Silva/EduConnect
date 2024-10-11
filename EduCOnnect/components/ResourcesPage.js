@@ -8,7 +8,6 @@ import {
   StyleSheet,
   ScrollView,
   Modal,
-  Button,
 } from "react-native";
 import { collection, onSnapshot } from "firebase/firestore";
 import * as FileSystem from "expo-file-system"; // For file downloads
@@ -16,6 +15,7 @@ import { db } from "../firebaseConfig";
 import BottomNavBarTeacher from "./BottomNavBar";
 import Icon from "react-native-vector-icons/MaterialIcons"; // For the quiz icon
 import { useNavigation } from "@react-navigation/native";
+
 export default function ResourcesPage({ navigation }) {
   const [pdfs, setPdfs] = useState([]);
   const [selectedPdf, setSelectedPdf] = useState(null); // For details popup
@@ -99,7 +99,7 @@ export default function ResourcesPage({ navigation }) {
           style={styles.quizButton}
           onPress={() => navigation.navigate("AllQuizzesScreen")} // Navigating to PlayQuizScreen
         >
-          <Icon name="quiz" size={40} color="#fff" />
+          <Icon name="quiz" size={50} color="#fff" />
           <Text style={styles.quizTitle}>Attempt Quizzes</Text>
           <Text style={styles.quizSubtitle}>
             Ready to test your knowledge? Click here to begin!
@@ -241,25 +241,29 @@ const styles = StyleSheet.create({
   },
   quizButton: {
     backgroundColor: "#1D2747",
-    height: 150,
+    height: 180, // Increase height for better visibility
     marginHorizontal: 20,
     marginVertical: 20,
-    borderRadius: 10,
+    borderRadius: 15, // Rounder corners for better visual appearance
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "#6699FF",
+    borderColor: "#FFD700", // Add the gold border for a premium look
+    shadowColor: "#000", // Add shadow for better visibility
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5, // Add elevation for shadow in Android
   },
   quizTitle: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 20, // Larger font for better visibility
     fontFamily: "Poppins_700Bold",
     marginTop: 10,
   },
   quizSubtitle: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 15, // Increase subtitle font size
     textAlign: "center",
     marginTop: 5,
     marginHorizontal: 20,

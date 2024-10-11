@@ -11,6 +11,7 @@ import {
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import BottomNavBar from "./BottomNavBar";
+
 // Leaderboard Screen Component
 export default function LeaderboardScreen() {
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -38,6 +39,7 @@ export default function LeaderboardScreen() {
     fetchLeaderboardData();
   }, []);
 
+  // Loading state
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -47,48 +49,86 @@ export default function LeaderboardScreen() {
     );
   }
 
+  // If no data is available
+  if (!leaderboardData || leaderboardData.length === 0) {
+    return (
+      <View style={styles.noDataContainer}>
+        <Text style={styles.noDataText}>No data available</Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Leader Board</Text>
       </View>
+
+      
       {leaderboardData.length > 0 && (
         <View style={styles.topThreeContainer}>
-          {/* Top 3 Users Section */}
-          {leaderboardData.slice(0, 3).map((user, index) => (
-            <View key={user.id} style={styles.topUserContainer}>
-              {/* Render crown only for the first user */}
-              {index === 0 && (
-                <Image
-                  source={require("../assets/cown.png")} // Crown image
-                  style={styles.crownImage}
-                />
-              )}
-              {/* <Image
-                source={require("../assets/default-avatar.png")} // Replace with actual avatar if available
-                style={styles.userAvatar}
-              /> */}
-              <Text style={styles.userName}>{user.fullName}</Text>
-              <Text style={styles.userScore}>{user.score} pts</Text>
+          
+          {leaderboardData[1] && (
+            <View style={styles.sideUserContainer}>
+              <Image
+                source={require("../assets/second.png")} // Second place icon
+                style={styles.smallIconImage}
+              />
+              <Text style={styles.userName}>
+                {leaderboardData[1]?.fullName || "Unnamed"}
+              </Text>
+              <Text style={styles.userScore}>
+                {leaderboardData[1]?.score?.toString() || "0"} pts
+              </Text>
             </View>
-          ))}
+          )}
+
+          {/* First Place User (Center) */}
+          {leaderboardData[0] && (
+            <View style={styles.centerUserContainer}>
+              <Image
+                source={require("../assets/first1.png")} // First place icon
+                style={styles.largeIconImage}
+              />
+              <Text style={styles.userName}>
+                {leaderboardData[0]?.fullName || "Unnamed"}
+              </Text>
+              <Text style={styles.userScore}>
+                {leaderboardData[0]?.score?.toString() || "0"} pts
+              </Text>
+            </View>
+          )}
+
+          {/* Third Place User (Right) */}
+          {leaderboardData[2] && (
+            <View style={styles.sideUserContainer}>
+              <Image
+                source={require("../assets/third.png")} // Third place icon
+                style={styles.smallIconImage}
+              />
+              <Text style={styles.userName}>
+                {leaderboardData[2]?.fullName || "Unnamed"}
+              </Text>
+              <Text style={styles.userScore}>
+                {leaderboardData[2]?.score?.toString() || "0"} pts
+              </Text>
+            </View>
+          )}
         </View>
       )}
 
-      {/* Render other users in the list */}
+      
       <FlatList
         data={leaderboardData.slice(3)}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id || item.index?.toString()}
         renderItem={({ item, index }) => (
           <View style={styles.leaderboardCard}>
-            <Text style={styles.rankText}>{index + 4}</Text> {/* Ranking */}
-            {/* <Image
-              source={require("../assets/default-avatar.png")} // Add a default avatar or user's image here
-              style={styles.userAvatar}
-            /> */}
+            <Text style={styles.rankText}>{index + 4}</Text> 
             <View style={styles.userInfo}>
-              <Text style={styles.userName}>{item.fullName}</Text>
-              <Text style={styles.userScore}>{item.score} points</Text>
+              <Text style={styles.userName}>{item?.fullName || "Unnamed"}</Text>
+              <Text style={styles.userScore}>
+                {item?.score?.toString() || "0"} points
+              </Text>
             </View>
           </View>
         )}
@@ -106,7 +146,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1F1F39",
-    
   },
   headerContainer: {
     backgroundColor: "#3D5CFF",
@@ -114,7 +153,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
     paddingBottom: 5,
     paddingTop: 20,
-    
   },
   header: {
     fontSize: 28,
@@ -134,32 +172,39 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
   },
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontFamily: "Poppins_700Bold",
-    marginBottom: 20,
-    textAlign: "center",
+  noDataContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1F1F39",
+  },
+  noDataText: {
+    color: "#B0B0C3",
+    fontSize: 16,
   },
   topThreeContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
+    alignItems: "flex-end", // Align side users to bottom of center user
     marginBottom: 20,
     marginTop: 40,
   },
-  topUserContainer: {
+  sideUserContainer: {
     alignItems: "center",
   },
-  crownImage: {
-    width: 50,
-    height: 50,
+  centerUserContainer: {
+    alignItems: "center",
+    marginBottom: 20, // Push the first place user down to make them visually larger
+  },
+  largeIconImage: {
+    width: 150, // Larger size for first place
+    height: 150,
     marginBottom: 10,
   },
-  userAvatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    marginBottom: 5,
+  smallIconImage: {
+    width: 130, // Smaller size for second and third places
+    height: 130,
+    marginBottom: 10,
   },
   userName: {
     color: "#FFFFFF",
@@ -187,11 +232,5 @@ const styles = StyleSheet.create({
   },
   userInfo: {
     flex: 1,
-  },
-  noDataText: {
-    color: "#B0B0C3",
-    textAlign: "center",
-    marginTop: 20,
-    fontSize: 16,
   },
 });

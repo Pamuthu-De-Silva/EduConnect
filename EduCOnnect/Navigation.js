@@ -27,6 +27,12 @@ import CourseDetailScreen from "./components/CourseDetailScreen";
 import AddQuestionScreenfirst from "./components/ADDQuestionFirstTime";
 import LeaderboardScreen from "./components/LeaderboardScreen";
 import ProfileScreenTeacher from "./components/ProfileScreenTeacher";
+import ChatScreen from "./components/ChatScreen";
+import CommunityForumScreen from "./components/CommunityForumScreen";
+import CommunityScreen from "./components/CommunityScreen";
+import CommunityScreenTeacher from "./components/CommunityScreenTeacher";
+import MessagesScreen from "./components/MessagesScreen";
+import StartNewChatScreen from "./components/StartNewChatScreen";
 const Stack = createStackNavigator();
 
 export default function Navigation() {
@@ -97,6 +103,36 @@ export default function Navigation() {
         <Stack.Screen
           name="ProfileScreenTeacher"
           component={ProfileScreenTeacher}
+        />
+
+        <Stack.Screen
+          name="ChatScreen"
+          component={ChatScreen}
+        />
+
+        <Stack.Screen
+          name="CommunityForumScreen"
+          component={CommunityForumScreen}
+        />
+
+        <Stack.Screen
+          name="CommunityScreen"
+          component={CommunityScreen}
+        />
+
+        <Stack.Screen
+          name="CommunityScreenTeacher"
+          component={CommunityScreenTeacher}
+        />
+
+        <Stack.Screen
+          name="MessagesScreen"
+          component={MessagesScreen}
+        />
+
+        <Stack.Screen
+          name="StartNewChatScreen"
+          component={StartNewChatScreen}
         />
 
         <Stack.Screen name="LeaderboardScreen" component={LeaderboardScreen} />

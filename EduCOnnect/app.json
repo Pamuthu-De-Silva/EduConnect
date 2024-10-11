@@ -7,7 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/educonnet.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -25,12 +25,14 @@
         "backgroundColor": "#ffffff"
       },
       "permissions": [
-        "INTERNET",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "READ_CALENDAR",
-        "WRITE_CALENDAR"
-      ]
+        "android.permission.INTERNET",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_CALENDAR",
+        "android.permission.WRITE_CALENDAR",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.pamuthu.EduCOnnect"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -43,6 +45,11 @@
           "allowsEditing": false
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "cde47d82-b3a9-4607-b749-92dd5ff6e348"
+      }
+    }
   }
 }

@@ -135,7 +135,7 @@ const AddQuestionScreen = ({ navigation, route }) => {
             <FormButton
               labelText="Done & Go Home"
               isPrimary={false}
-              handleOnPress={() => navigation.navigate("TeacherDashboard")}
+              handleOnPress={() => navigation.navigate("AllQuizzesScreenTeacher")}
               style={{ marginVertical: 20 }}
             />
           </View>

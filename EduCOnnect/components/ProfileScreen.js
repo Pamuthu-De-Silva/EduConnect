@@ -12,7 +12,8 @@ import { auth, db } from "../firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 import BottomNavBar from "./BottomNavBar";
 import { useNavigation } from "@react-navigation/native";
-import Icon from "react-native-vector-icons/MaterialIcons"; 
+import Icon from "react-native-vector-icons/MaterialIcons"; // Importing for the leaderboard icon
+
 const { width } = Dimensions.get("window");
 
 export default function ProfileScreen() {
@@ -66,15 +67,19 @@ export default function ProfileScreen() {
           Account Type: {userData.accountType}
         </Text>
       </View>
+
+      {/* Leaderboard Button */}
       <TouchableOpacity
-        style={styles.quizButton}
-        onPress={() => navigation.navigate("AllQuizzesScreen")} // Navigating to PlayQuizScreen
+        style={styles.leaderboardButton}
+        onPress={() => navigation.navigate("LeaderboardScreen")} // Navigate to LeaderboardScreen
       >
-        <Icon name="schedule" size={40} color="#fff" />
-        <Text style={styles.quizTitle}>Study Planner</Text>
-        <Text style={styles.quizSubtitle}>
-          Study according to the study plan, make study more motivated</Text>
+        <Icon name="leaderboard" size={50} color="#fff" />
+        <Text style={styles.leaderboardTitle}>Leaderboard</Text>
+        <Text style={styles.leaderboardSubtitle}>
+          See how you rank against other learners!
+        </Text>
       </TouchableOpacity>
+
       {/* Sign Out Button */}
       <TouchableOpacity style={styles.buttonSignOut} onPress={handleSignOut}>
         <Text style={styles.buttonText}>Sign Out</Text>
@@ -97,27 +102,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: -80,
   },
-  quizButton: {
+  leaderboardButton: {
     backgroundColor: "#1D2747",
-    height: 150,
+    height: 180, // Increase height for better visibility
     marginHorizontal: 20,
     marginVertical: 20,
-    borderRadius: 10,
+    borderRadius: 15, // Rounder corners for better visual appearance
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderStyle: "dashed",
-    borderColor: "#6699FF",
+    borderColor: "#FFD700", // Gold border for leaderboard button
+    shadowColor: "#000", // Add shadow for better visibility
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 4,
+    elevation: 5, // Add elevation for shadow in Android
   },
-  quizTitle: {
+  leaderboardTitle: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 20, // Larger font for better visibility
     fontFamily: "Poppins_700Bold",
     marginTop: 10,
   },
-  quizSubtitle: {
+  leaderboardSubtitle: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 15, // Increase subtitle font size
     textAlign: "center",
     marginTop: 5,
     marginHorizontal: 20,
